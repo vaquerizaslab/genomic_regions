@@ -4,8 +4,8 @@ This module provides functions and classes to work with genomic regions
 
 Its main classes are:
 
-* :class:`GenomicRegion`: A class that represents a genomic region/interval
-* :class:`RegionBased`: The base class for collections of genomic regions
+* :class:`~GenomicRegion`: A class that represents a genomic region/interval
+* :class:`~RegionBased`: The base class for collections of genomic regions
 
 The aim of this module, besides providing an intuitive set of tools operating
 on genomic regions and collections thereof, is to supply a unified interface
@@ -57,10 +57,10 @@ __all__ = ['GenomicRegion', 'Bed', 'Bedpe', 'RegionWrapper',
 
 def as_region(region):
     """
-    Convert string to :class:`GenomicRegion`.
+    Convert string to :class:`~GenomicRegion`.
 
-    :param region: str or :class:`GenomicRegion`
-    :return: :class:`GenomicRegion`
+    :param region: str or :class:`~GenomicRegion`
+    :return: :class:`~GenomicRegion`
     """
     if isinstance(region, string_types):
         return GenomicRegion.from_string(region)
@@ -73,8 +73,8 @@ def merge_regions(regions):
     """
     Merge overlapping regions in list.
 
-    :param regions: :class:`list` of :class:`GenomicRegion` objects
-    :return: :class:`list` of merged :class:`GenomicRegion` objects
+    :param regions: :class:`list` of :class:`~GenomicRegion` objects
+    :return: :class:`list` of merged :class:`~GenomicRegion` objects
     """
     sorted_regions = sorted(regions, key=lambda r: (r.chromosome, r.start))
 
@@ -106,12 +106,12 @@ def merge_regions(regions):
 
 def load(file_name, *args, **kwargs):
     """
-    Open file containing genomic regions as :class:`RegionBased` object.
+    Open file containing genomic regions as :class:`~RegionBased` object.
 
     :param file_name: Path to genomic regions file
     :param args: Additional arguments passed to downstream class
     :param kwargs: Additional keyword arguments passed to downstream class
-    :return: :class:`RegionBased`
+    :return: :class:`~RegionBased`
     """
     import os
     file_name = os.path.expanduser(file_name)
@@ -182,12 +182,13 @@ class GenomicRegion(object):
 
     .. attribute:: strand
 
-        Strand this region is on (+1, -1)
+        Strand this region is on. Can be a str ('+', '-', '.'),
+        None, or an int (+1, -1)
 
     .. attribute:: ix
 
-        Index of the region in the context of all genomic
-        regions.
+        Index of the region in the context of a set of
+         genomic regions.
 
     """
 
@@ -198,8 +199,9 @@ class GenomicRegion(object):
         :param chromosome: Name of the chromosome this region is located on
         :param start: Start position of the region in base pairs
         :param end: End position of the region in base pairs
-        :param strand: Strand this region is on (+1, -1)
-        :param ix: Index of the region in the context of all genomic
+        :param strand: Strand this region is on. Can be a str ('+', '-', '.'),
+                       None, or an int (+1, -1)
+        :param ix: Index of the region in the context of a set of genomic
                    regions.
         """
         self.start = start
@@ -215,28 +217,31 @@ class GenomicRegion(object):
         self.strand = strand
         self.chromosome = chromosome.decode() if isinstance(chromosome, bytes) else chromosome
         self.ix = ix
-        self.attributes = ['chromosome', 'start', 'end', 'strand', 'ix']
 
         for name, value in kwargs.items():
-            setattr(self, name.decode() if isinstance(name, bytes) else name,
-                    value.decode() if isinstance(value, bytes) else value)
-            self.attributes.append(name)
+            self.set_attribute(name, value)
 
     def set_attribute(self, attribute, value):
-        setattr(self, attribute, value)
-        if attribute not in self.attributes:
-            self.attributes.append(attribute)
+        """
+        Safely set an attribute on the :class:`~GenomicRegion` object.
 
-    @classmethod
-    def from_row(cls, row):
+        This automatically decodes bytes objects into UTF-8 strings.
+
+        :param attribute: Name of the attribute to be set
+        :param value: Value of the attribute to be set
         """
-        Create a :class:`~GenomicRegion` from a PyTables row.
+        setattr(self, attribute.decode() if isinstance(attribute, bytes) else attribute,
+                value.decode() if isinstance(value, bytes) else value)
+
+    @property
+    def attributes(self):
         """
-        strand = row['strand']
-        if strand == 0:
-            strand = None
-        return cls(start=row["start"], end=row["end"],
-                   strand=strand, chromosome=row["chromosome"])
+        Return all visible attributes of this :class:`~GenomicRegion`.
+
+        Returns all attribute names that do not start with an underscore.
+        :return: list of attribute names
+        """
+        return [name for name in self.__dict__.keys() if not name.startswith('_')]
 
     @classmethod
     def from_string(cls, region_string):
@@ -245,7 +250,7 @@ class GenomicRegion(object):
 
         This is a very useful convenience function to quickly
         define a :class:`~GenomicRegion` object from a descriptor
-        string.
+        string. Numbers can be abbreviated as '12k', '1.5M', etc.
 
         :param region_string: A string of the form
                               <chromosome>[:<start>-<end>[:<strand>]]
@@ -291,7 +296,7 @@ class GenomicRegion(object):
                 strand = -1
             else:
                 raise ValueError("Strand only can be one of '+', '-', '+1', '-1', and '1'")
-        return cls(start=start, end=end, chromosome=chromosome, strand=strand)
+        return cls(chromosome=chromosome, start=start, end=end, strand=strand)
 
     def to_string(self):
         """
@@ -337,6 +342,13 @@ class GenomicRegion(object):
         return False
 
     def overlap(self, region):
+        """
+        Return the overlap in base pairs between this
+        region and another region.
+
+        :param region: :class:`~GenomicRegion` to find overlap for
+        :return: overlap as int in base pairs
+        """
         if region.chromosome != self.chromosome:
             return 0
 
@@ -365,20 +377,37 @@ class GenomicRegion(object):
             return False
         if region.end != self.end:
             return False
+        if region.strand != self.strand:
+            return False
         return True
 
     def is_reverse(self):
+        """
+        Return True if this region is on the reverse strand of the reference.
+
+        :return: True if on '-' strand, False otherwise.
+        """
         if self.strand == -1 or self.strand == '-':
             return True
         return False
 
     def is_forward(self):
+        """
+        Return True if this region is on the forward strand of the reference.
+
+        :return: True if on '+' strand, False otherwise.
+        """
         if self.strand == 1 or self.strand == '+' or self.strand == 0:
             return True
         return False
 
     @property
     def strand_string(self):
+        """
+        Return the 'strand' attribute as string.
+
+        :return: strand as str ('+', '-', or '.')
+        """
         if self.is_forward():
             return '+'
         if self.is_reverse():
@@ -387,17 +416,39 @@ class GenomicRegion(object):
 
     @property
     def center(self):
+        """
+        Return the center coordinate of the :class:`~GenomicRegion`.
+
+        :return: float
+        """
         return self.start + (self.end - self.start) / 2
 
     @property
     def five_prime(self):
+        """
+        Return the position of the 5' end of this :class:`~GenomicRegion`
+        on the reference.
+
+        :return: int
+        """
         return self.end if self.is_reverse() else self.start
 
     @property
     def three_prime(self):
+        """
+        Return the position of the 3' end of this :class:`~GenomicRegion`
+        on the reference.
+
+        :return: int
+        """
         return self.end if self.is_forward() else self.start
 
     def copy(self):
+        """
+        Return a (shallow) copy of this :class:`~GenomicRegion`
+
+        :return: :class:`~GenomicRegion`
+        """
         d = {attribute: getattr(self, attribute) for attribute in self.attributes}
         return GenomicRegion(**d)
 
@@ -411,6 +462,15 @@ class GenomicRegion(object):
         return self.end - self.start
 
     def as_bed_line(self, score_field='score', name_field='name'):
+        """
+        Return a representation of this object as line in a BED file.
+
+        :param score_field: name of the attribute to be used in the
+                            'score' field of the BED line
+        :param name_field: name of the attribute to be used in the
+                           'name' field of the BED line
+        :return: str
+        """
         try:
             score = getattr(self, score_field)
         except AttributeError:
@@ -428,6 +488,21 @@ class GenomicRegion(object):
 
     def as_gff_line(self, source_field='source', feature_field='feature', score_field='score',
                     frame_field='frame', float_format='.2e'):
+        """
+        Return a representation of this object as line in a GFF file.
+
+        :param source_field: name of the attribute to be used in the
+                            'source' field of the GFF line
+        :param feature_field: name of the attribute to be used in the
+                              'feature' field of the GFF line
+        :param score_field: name of the attribute to be used in the
+                            'score' field of the GFF line
+        :param frame_field: name of the attribute to be used in the
+                            'frame' field of the GFF line
+        :param float_format: Formatting string for the float fields
+
+        :return: str
+        """
         try:
             source = getattr(self, source_field)
         except AttributeError:
@@ -475,6 +550,44 @@ class GenomicRegion(object):
                absolute_left=0, absolute_right=0,
                relative_left=0.0, relative_right=0.0,
                copy=True, from_center=False):
+        """
+        Expand this region by a relative or an absolute amount.
+
+        :param absolute: Absolute amount in base pairs by which to
+                         expand the region represented by this
+                         :class:`~GenomicRegion` object on both
+                         sides. New region start will be
+                         <old start - absolute>, new region end
+                         will be <old end + absolute>
+        :param relative: Relative amount in base pairs by which to
+                         expand the region represented by this
+                         :class:`~GenomicRegion` object on both
+                         sides. New region start will be
+                         <old start - relative*len(self)>,
+                         new region end will be
+                         <old end + relative*(len(self)>
+        :param absolute_left: Absolute amount in base pairs by which to
+                              expand the region represented by this
+                              :class:`~GenomicRegion` object on the
+                              left side
+        :param absolute_right: Absolute amount in base pairs by which to
+                               expand the region represented by this
+                               :class:`~GenomicRegion` object on the
+                               right side
+        :param relative_left: Relative amount in base pairs by which to
+                              expand the region represented by this
+                              :class:`~GenomicRegion` object on the
+                              left side
+        :param relative_right: Relative amount in base pairs by which to
+                               expand the region represented by this
+                               :class:`~GenomicRegion` object on the
+                               right side
+        :param copy: If True, return a copy of the original region,
+                     if False will modify the existing region in place
+        :param from_center: If True measures distance from center rather
+                            than start and end of the old region
+        :return: :class:`~GenomicRegion`
+        """
         if absolute is not None:
             absolute_left, absolute_right = absolute, absolute
         if relative is not None:
@@ -502,188 +615,20 @@ class GenomicRegion(object):
     def __sub__(self, distance):
         return self.__add__(-distance)
 
-    def fix_chromosome(self):
-        if self.chromosome.startswith('chr'):
-            self.chromosome = self.chromosome[3:]
+    def fix_chromosome(self, copy=False):
+        """
+        Change chromosome representation from chr<NN> to <NN> or vice versa.
+
+        :param copy: If True, make copy of region, otherwise
+                     will modify existing region in place.
+        :return: :class:`~GenomicRegion`
+        """
+        region = self.copy() if copy else self
+        if region.chromosome.startswith('chr'):
+            region.chromosome = region.chromosome[3:]
         else:
-            self.chromosome = 'chr' + self.chromosome
-
-
-class BedRegion(GenomicRegion):
-    def __init__(self, bed_line, ix=None):
-        try:
-            self.fields = bed_line.split("\t")
-        except AttributeError:
-            self.fields = bed_line
-
-        self.attributes = ('chromosome', 'start', 'end', 'name', 'score', 'strand',
-                           'thick_start', 'thick_end', 'item_rgb', 'block_count',
-                           'block_sizes', 'block_starts')[:len(self.fields)]
-        self.ix = ix
-
-    @property
-    def chromosome(self):
-        return self.fields[0]
-
-    @property
-    def start(self):
-        return int(self.fields[1])
-
-    @property
-    def end(self):
-        return int(self.fields[2])
-
-    @property
-    def name(self):
-        try:
-            return self.fields[3]
-        except IndexError:
-            return None
-
-    @property
-    def strand(self):
-        try:
-            s = self.fields[5]
-            return -1 if s == '-' else 1
-        except IndexError:
-            return 1
-
-    @property
-    def score(self):
-        try:
-            return float(self.fields[4])
-        except (IndexError, ValueError):
-            return np.nan
-
-    @property
-    def thick_start(self):
-        try:
-            return int(self.fields[6])
-        except IndexError:
-            return None
-
-    @property
-    def thick_end(self):
-        try:
-            return int(self.fields[7])
-        except IndexError:
-            return None
-
-    @property
-    def item_rgb(self):
-        try:
-            return self.fields[8].split(',')
-        except IndexError:
-            return None
-
-    @property
-    def block_count(self):
-        try:
-            return int(self.fields[9])
-        except IndexError:
-            return None
-
-    @property
-    def block_sizes(self):
-        try:
-            return [int(s) for s in self.fields[10].split(',')]
-        except IndexError:
-            return None
-
-    @property
-    def block_sizes(self):
-        try:
-            return [int(s) for s in self.fields[11].split(',')]
-        except IndexError:
-            return None
-
-
-class GffRegion(GenomicRegion):
-    def __init__(self, gff_line, ix=None):
-        try:
-            self.fields = gff_line.split("\t")
-        except AttributeError:
-            self.fields = gff_line
-
-        self.ix = ix
-        self._attribute_dict = None
-
-    @property
-    def attributes(self):
-        a = ['ix', 'chromosome', 'source', 'feature', 'start', 'end',
-             'score', 'strand', 'frame']
-
-        return a + list(self.attribute_dict.keys())
-
-    @property
-    def attribute_dict(self):
-        if self._attribute_dict is None:
-            self._attribute_dict = dict()
-
-            attribute_fields = re.split(";\s*", self.fields[8])
-            for field in attribute_fields:
-                try:
-                    key, value = shlex.split(field)
-                except ValueError:
-                    try:
-                        key, value = re.split('=', field)
-                    except ValueError:
-                        continue
-                self._attribute_dict[key] = value
-        return self._attribute_dict
-
-    def __getattr__(self, item):
-        try:
-            return self.attribute_dict[item]
-        except (IndexError, KeyError):
-            raise AttributeError("Attribute {} cannot be found".format(item))
-
-    @property
-    def seqname(self):
-        return self.fields[0]
-
-    @property
-    def source(self):
-        return self.fields[1]
-
-    @property
-    def feature(self):
-        return self.fields[2]
-
-    @property
-    def chromosome(self):
-        return self.seqname
-
-    @property
-    def start(self):
-        return int(self.fields[3])
-
-    @property
-    def end(self):
-        return int(self.fields[4])
-
-    @property
-    def name(self):
-        return None
-
-    @property
-    def strand(self):
-        try:
-            s = self.fields[6]
-            return -1 if s == '-' else 1
-        except IndexError:
-            return 1
-
-    @property
-    def score(self):
-        try:
-            return float(self.fields[4])
-        except (IndexError, ValueError):
-            return np.nan
-
-    @property
-    def frame(self):
-        return self.fields[7]
+            region.chromosome = 'chr' + region.chromosome
+        return region
 
 
 class RegionBased(object):
@@ -703,7 +648,7 @@ class RegionBased(object):
     CAN (override for potential speed benefits or added functionality):
         _region_len
         chromosomes
-        chromosome_lens
+        chromosome_lengths
         region_bins
     """
 
@@ -830,10 +775,6 @@ class RegionBased(object):
         return chromosomes
 
     @property
-    def chromosome_lens(self):
-        return self.chromosome_lengths
-
-    @property
     def chromosome_lengths(self):
         """
         Returns a dictionary of chromosomes and their length
@@ -938,6 +879,24 @@ class RegionBased(object):
 
     def region_intervals(self, region, bins=None, bin_size=None, smoothing_window=None,
                          nan_replacement=None, zero_to_nan=False, *args, **kwargs):
+        """
+        Return equally-sized genomic intervals and associated scores.
+
+        Use either bins or bin_size argument to control binning.
+
+        :param region:  String or class:`~GenomicRegion`
+                        object denoting the region to be binned
+        :param bins: Number of bins to divide the region into
+        :param bin_size: Size of each bin (alternative to bins argument)
+        :param smoothing_window: Size of window (in bins) to smooth scores
+                                 over
+        :param nan_replacement: NaN values in the scores will be replaced
+                                with this value
+        :param zero_to_nan: If True, will convert bins with score 0 to NaN
+        :param args: Arguments passed to _region_intervals
+        :param kwargs: Keyword arguments passed to _region_intervals
+        :return: iterator of tuples: (start, end, score)
+        """
         region = self._convert_region(region)
         if not isinstance(region, GenomicRegion):
             raise ValueError("Region must be a GenomicRegion object or equivalent string!")
@@ -965,10 +924,30 @@ class RegionBased(object):
                                                          zero_to_nan=zero_to_nan)
 
     def intervals(self, *args, **kwargs):
+        """
+        Alias for region_intervals.
+        """
         return self.region_intervals(*args, **kwargs)
 
     def binned_regions(self, region=None, bins=None, bin_size=None, smoothing_window=None,
                        nan_replacement=None, zero_to_nan=False, *args, **kwargs):
+        """
+        Same as region_intervals, but returns :class:`~GenomicRegion`
+        objects instead of tuples.
+
+        :param region:  String or class:`~GenomicRegion`
+                        object denoting the region to be binned
+        :param bins: Number of bins to divide the region into
+        :param bin_size: Size of each bin (alternative to bins argument)
+        :param smoothing_window: Size of window (in bins) to smooth scores
+                                 over
+        :param nan_replacement: NaN values in the scores will be replaced
+                                with this value
+        :param zero_to_nan: If True, will convert bins with score 0 to NaN
+        :param args: Arguments passed to _region_intervals
+        :param kwargs: Keyword arguments passed to _region_intervals
+        :return: iterator of :class:`~GenomicRegion` objects
+        """
         region = self._convert_region(region)
         br = []
         if region is None:
@@ -993,6 +972,22 @@ class RegionBased(object):
     @staticmethod
     def bin_intervals(intervals, bins, interval_range=None, smoothing_window=None,
                       nan_replacement=None, zero_to_nan=False):
+        """
+        Bin a given set of intervals into a fixed number of bins.
+
+        :param intervals: iterator of tuples (start, end, score)
+        :param bins: Number of bins to divide the region into
+        :param interval_range: Optional. Tuple (start, end) in base pairs
+                               of range of interval to be binned. Useful if
+                               intervals argument does not cover to exact
+                               genomic range to be binned.
+        :param smoothing_window: Size of window (in bins) to smooth scores
+                                 over
+        :param nan_replacement: NaN values in the scores will be replaced
+                                with this value
+        :param zero_to_nan: If True, will convert bins with score 0 to NaN
+        :return: iterator of tuples: (start, end, score)
+        """
         if intervals is None:
             return []
 
@@ -1015,6 +1010,22 @@ class RegionBased(object):
     @staticmethod
     def bin_intervals_equidistant(intervals, bin_size, interval_range=None, smoothing_window=None,
                                   nan_replacement=None, zero_to_nan=False):
+        """
+        Bin a given set of intervals into bins with a fixed size.
+
+        :param intervals: iterator of tuples (start, end, score)
+        :param bin_size: Size of each bin in base pairs
+        :param interval_range: Optional. Tuple (start, end) in base pairs
+                               of range of interval to be binned. Useful if
+                               intervals argument does not cover to exact
+                               genomic range to be binned.
+        :param smoothing_window: Size of window (in bins) to smooth scores
+                                 over
+        :param nan_replacement: NaN values in the scores will be replaced
+                                with this value
+        :param zero_to_nan: If True, will convert bins with score 0 to NaN
+        :return: iterator of tuples: (start, end, score)
+        """
         if intervals is None:
             return []
 
@@ -1111,35 +1122,36 @@ class RegionBased(object):
 
         return tuple((bin_coordinates[i][0], bin_coordinates[i][1], result[i]) for i in range(len(result)))
 
-    def binned_values(self, region, bins, smoothing_window=None, zero_to_nan=False):
-        region = self._convert_region(region)
-        return RegionBased.bin_intervals(self.region_intervals(region), bins,
-                                         interval_range=(region.start, region.end),
-                                         smoothing_window=smoothing_window,
-                                         zero_to_nan=zero_to_nan)
-
-    def binned_values_equidistant(self, region, bin_size, smoothing_window=None, zero_to_nan=False):
-        region = self._convert_region(region)
-        return RegionBased.bin_intervals_equidistant(self.region_intervals(region), bin_size,
-                                                     interval_range=(region.start, region.end),
-                                                     smoothing_window=smoothing_window,
-                                                     zero_to_nan=zero_to_nan)
-
     def to_bed(self, file_name, subset=None, **kwargs):
         """
         Export regions as BED file
+
+        :param file_name: Path of file to write regions to
+        :param subset: optional :class:`~GenomicRegion` or str to
+                       write only regions overlapping this region
+        :param kwargs: Passed to :func:`write_bed`
         """
         write_bed(file_name, self.regions(subset), **kwargs)
 
     def to_gff(self, file_name, subset=None, **kwargs):
         """
         Export regions as GFF file
+
+        :param file_name: Path of file to write regions to
+        :param subset: optional :class:`~GenomicRegion` or str to
+                       write only regions overlapping this region
+        :param kwargs: Passed to :func:`write_gff`
         """
         write_gff(file_name, self.regions(subset), **kwargs)
 
     def to_bigwig(self, file_name, subset=None, **kwargs):
         """
         Export regions as BigWig file.
+
+        :param file_name: Path of file to write regions to
+        :param subset: optional :class:`~GenomicRegion` or str to
+                       write only regions overlapping this region
+        :param kwargs: Passed to :func:`write_bigwig`
         """
         write_bigwig(file_name, self.regions(subset), mode='w', **kwargs)
 
@@ -1585,6 +1597,187 @@ class BigWig(RegionBased):
         return self.region_intervals(region, bins=bins, bin_size=bin_size, smoothing_window=smoothing_window,
                                      nan_replacement=nan_replacement, zero_to_nan=zero_to_nan,
                                      *args, **kwargs)
+
+
+class BedRegion(GenomicRegion):
+    def __init__(self, bed_line, ix=None):
+        try:
+            self.fields = bed_line.split("\t")
+        except AttributeError:
+            self.fields = bed_line
+
+        self._attributes = ('chromosome', 'start', 'end', 'name', 'score', 'strand',
+                            'thick_start', 'thick_end', 'item_rgb', 'block_count',
+                            'block_sizes', 'block_starts')[:len(self.fields)]
+        self.ix = ix
+
+    @property
+    def attributes(self):
+        return self._attributes
+
+    @property
+    def chromosome(self):
+        return self.fields[0]
+
+    @property
+    def start(self):
+        return int(self.fields[1])
+
+    @property
+    def end(self):
+        return int(self.fields[2])
+
+    @property
+    def name(self):
+        try:
+            return self.fields[3]
+        except IndexError:
+            return None
+
+    @property
+    def strand(self):
+        try:
+            s = self.fields[5]
+            return -1 if s == '-' else 1
+        except IndexError:
+            return 1
+
+    @property
+    def score(self):
+        try:
+            return float(self.fields[4])
+        except (IndexError, ValueError):
+            return np.nan
+
+    @property
+    def thick_start(self):
+        try:
+            return int(self.fields[6])
+        except IndexError:
+            return None
+
+    @property
+    def thick_end(self):
+        try:
+            return int(self.fields[7])
+        except IndexError:
+            return None
+
+    @property
+    def item_rgb(self):
+        try:
+            return self.fields[8].split(',')
+        except IndexError:
+            return None
+
+    @property
+    def block_count(self):
+        try:
+            return int(self.fields[9])
+        except IndexError:
+            return None
+
+    @property
+    def block_sizes(self):
+        try:
+            return [int(s) for s in self.fields[10].split(',')]
+        except IndexError:
+            return None
+
+    @property
+    def block_sizes(self):
+        try:
+            return [int(s) for s in self.fields[11].split(',')]
+        except IndexError:
+            return None
+
+
+class GffRegion(GenomicRegion):
+    def __init__(self, gff_line, ix=None):
+        try:
+            self.fields = gff_line.split("\t")
+        except AttributeError:
+            self.fields = gff_line
+
+        self.ix = ix
+        self._attribute_dict = None
+
+    @property
+    def attributes(self):
+        a = ['ix', 'chromosome', 'source', 'feature', 'start', 'end',
+             'score', 'strand', 'frame']
+
+        return a + list(self.attribute_dict.keys())
+
+    @property
+    def attribute_dict(self):
+        if self._attribute_dict is None:
+            self._attribute_dict = dict()
+
+            attribute_fields = re.split(";\s*", self.fields[8])
+            for field in attribute_fields:
+                try:
+                    key, value = shlex.split(field)
+                except ValueError:
+                    try:
+                        key, value = re.split('=', field)
+                    except ValueError:
+                        continue
+                self._attribute_dict[key] = value
+        return self._attribute_dict
+
+    def __getattr__(self, item):
+        try:
+            return self.attribute_dict[item]
+        except (IndexError, KeyError):
+            raise AttributeError("Attribute {} cannot be found".format(item))
+
+    @property
+    def seqname(self):
+        return self.fields[0]
+
+    @property
+    def source(self):
+        return self.fields[1]
+
+    @property
+    def feature(self):
+        return self.fields[2]
+
+    @property
+    def chromosome(self):
+        return self.seqname
+
+    @property
+    def start(self):
+        return int(self.fields[3])
+
+    @property
+    def end(self):
+        return int(self.fields[4])
+
+    @property
+    def name(self):
+        return None
+
+    @property
+    def strand(self):
+        try:
+            s = self.fields[6]
+            return -1 if s == '-' else 1
+        except IndexError:
+            return 1
+
+    @property
+    def score(self):
+        try:
+            return float(self.fields[4])
+        except (IndexError, ValueError):
+            return np.nan
+
+    @property
+    def frame(self):
+        return self.fields[7]
 
 
 class Tabix(RegionBased):
