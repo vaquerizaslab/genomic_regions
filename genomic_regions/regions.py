@@ -1157,6 +1157,12 @@ class RegionBased(object):
 
 
 class RegionWrapper(RegionBased):
+    """
+    Provide :class:`~RegionBased` functionality to any list of regions.
+
+    This class uses interval trees internally to provide fast region subsetting.
+    On initialisation these trees will be generated, which might take some time.
+    """
     def __init__(self, regions):
         super(RegionWrapper, self).__init__()
         region_intervals = defaultdict(list)
