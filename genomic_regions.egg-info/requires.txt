@@ -1,7 +1,0 @@
-pandas
-numpy
-pybedtools
-pysam
-future
-pyBigWig
-intervaltree
