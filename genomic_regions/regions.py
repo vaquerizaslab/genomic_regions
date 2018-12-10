@@ -1617,25 +1617,22 @@ class BigWig(RegionBased):
         return self._get_regions(item)
 
     def load_intervals_into_memory(self):
-        self._intervals = dict()
+        """
+        Load entire BigWig file into memory.
+
+        May speed up interval search over slow file systems or connections.
+        """
+        all_intervals = []
         for chromosome in self.bw.chroms().keys():
-            interval_starts = []
-            interval_ends = []
-            interval_values = []
             for start, end, score in self.bw.intervals(chromosome):
-                interval_starts.append(start)
-                interval_ends.append(end)
-                interval_values.append(score)
-            self._intervals[chromosome] = (interval_starts,
-                                           interval_ends,
-                                           interval_values)
+                interval = intervaltree.Interval(start, end, data=score)
+                all_intervals.append(interval)
+        self._intervals = intervaltree.IntervalTree(all_intervals)
 
     def _memory_intervals(self, region):
-        all_intervals = self._intervals[region.chromosome]
-        start_ix = bisect_right(all_intervals[0], region.start) - 1
-        end_ix = bisect_left(all_intervals[1], region.end)
-        return [(all_intervals[0][ix], all_intervals[1][ix], all_intervals[2][ix])
-                for ix in range(max(0, start_ix), min(len(all_intervals[0]), end_ix + 1))]
+        chromosome_intervals = self._intervals[region.chromosome]
+        return [(interval.begin, interval.end, interval.data)
+                for interval in chromosome_intervals[region.start-1, region.end]]
 
     def region_stats(self, region, bins=1, stat='mean'):
         """
