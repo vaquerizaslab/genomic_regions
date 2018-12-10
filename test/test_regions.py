@@ -177,6 +177,30 @@ class TestBigWig(RegionBasedTestFactory):
         pass
 
 
+class TestBigWigMemory(RegionBasedTestFactory):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, tmpdir):
+        chromosomes = [
+            {'name': 'chr1', 'end': 10000},
+            {'name': 'chr2', 'end': 15000},
+            {'name': 'chr3', 'end': 7000}
+        ]
+
+        regions = []
+        for chromosome in chromosomes:
+            for start in range(1, chromosome["end"] - 1000, 1000):
+                regions.append(GenomicRegion(start=start, end=start + 999, chromosome=chromosome["name"]))
+
+        bw_file = os.path.join(str(tmpdir), 'test.bw')
+        write_bigwig(bw_file, regions)
+
+        self.regions = BigWig(bw_file)
+        self.regions.load_intervals_into_memory()
+
+    def test_get_item(self):
+        pass
+
+
 @pytest.mark.skipif(which('tabix') is None, reason="Cannot find tabix in PATH")
 class TestTabix(RegionBasedTestFactory):
     @pytest.fixture(autouse=True)
