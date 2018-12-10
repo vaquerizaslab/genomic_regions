@@ -1622,17 +1622,20 @@ class BigWig(RegionBased):
 
         May speed up interval search over slow file systems or connections.
         """
-        all_intervals = []
+        self._intervals = dict()
         for chromosome in self.bw.chroms().keys():
+            chromosome_intervals = []
             for start, end, score in self.bw.intervals(chromosome):
+                print(start, end, type(start), type(end), score)
                 interval = intervaltree.Interval(start, end, data=score)
-                all_intervals.append(interval)
-        self._intervals = intervaltree.IntervalTree(all_intervals)
+                chromosome_intervals.append(interval)
+
+            self._intervals[chromosome] = intervaltree.IntervalTree(chromosome_intervals)
 
     def _memory_intervals(self, region):
         chromosome_intervals = self._intervals[region.chromosome]
         return [(interval.begin, interval.end, interval.data)
-                for interval in chromosome_intervals[region.start-1, region.end]]
+                for interval in chromosome_intervals[region.start - 1:region.end]]
 
     def region_stats(self, region, bins=1, stat='mean'):
         """
