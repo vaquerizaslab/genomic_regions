@@ -1626,7 +1626,6 @@ class BigWig(RegionBased):
         for chromosome in self.bw.chroms().keys():
             chromosome_intervals = []
             for start, end, score in self.bw.intervals(chromosome):
-                print(start, end, type(start), type(end), score)
                 interval = intervaltree.Interval(start, end, data=score)
                 chromosome_intervals.append(interval)
 
