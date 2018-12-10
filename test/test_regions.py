@@ -227,3 +227,33 @@ class TestTabix(RegionBasedTestFactory):
 
     def test_get_item(self):
         pass
+
+
+class TestGenomicDataFrame(RegionBasedTestFactory):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, tmpdir):
+        chromosomes = [
+            {'name': 'chr1', 'end': 10000},
+            {'name': 'chr2', 'end': 15000},
+            {'name': 'chr3', 'end': 7000}
+        ]
+
+        regions = []
+        for chromosome in chromosomes:
+            for start in range(1, chromosome["end"] - 1000, 1000):
+                regions.append(GenomicRegion(start=start, end=start + 999, chromosome=chromosome["name"]))
+
+        chromosome_list = [r.chromosome for r in regions]
+        start_list = [r.start for r in regions]
+        end_list = [r.end for r in regions]
+
+        data = {
+            'chromosome': chromosome_list,
+            'start': start_list,
+            'end': end_list,
+        }
+
+        self.regions = GenomicDataFrame(data)
+
+    def test_get_item(self):
+        pass

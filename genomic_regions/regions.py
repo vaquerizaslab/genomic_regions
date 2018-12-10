@@ -1662,6 +1662,9 @@ class BigWig(RegionBased):
 
 
 class BedRegion(GenomicRegion):
+    """
+    Represents a BED file line.
+    """
     def __init__(self, bed_line, ix=None):
         try:
             self.fields = bed_line.split("\t")
@@ -1755,6 +1758,9 @@ class BedRegion(GenomicRegion):
 
 
 class GffRegion(GenomicRegion):
+    """
+    Represents a GFF file line.
+    """
     def __init__(self, gff_line, ix=None):
         try:
             self.fields = gff_line.split("\t")
@@ -1843,6 +1849,12 @@ class GffRegion(GenomicRegion):
 
 
 class Tabix(RegionBased):
+    """
+    Represents a Tabix file.
+
+    Tabix-indexed files offer large speed improvements over
+    regular BED/VCF/GFF files.
+    """
     def __init__(self, file_name, preset=None):
         self._file_name = file_name
         self._file = pysam.TabixFile(file_name, parser=pysam.asTuple())
@@ -1884,7 +1896,7 @@ class Tabix(RegionBased):
             for region in self.subset(chromosome):
                 yield region
 
-    def _region_subset(self, region):
+    def _region_subset(self, region, *args, **kwargs):
         try:
             for fields in self._file.fetch(region.chromosome, region.start, region.end):
                 yield self._region_object(fields)
@@ -1905,25 +1917,44 @@ class Tabix(RegionBased):
         tabix_command += file_name
 
 
-class GenomicDataFrame(DataFrame):
+class GenomicDataFrame(DataFrame, RegionBased):
+    """
+    Represents :class:`~pandas.DataFrame` as regionbased object.
+
+    For full functionality, must contains the columns:
+    chromosome
+    start
+    end
+
+    """
     @property
-    def regions(self):
-        class RegionIter(object):
-            def __init__(self, df):
-                self.df = df
+    def _estimate_region_bounds(self):
+        return False
 
-            def __iter__(self):
-                for ix, row in self.df.iterrows():
-                    yield self.df._row_to_region(row, ix=ix)
+    @property
+    def file_type(self):
+        return "dataframe"
 
-            def __call__(self):
-                return iter(self)
-
-        return RegionIter(self)
-
-    def subset(self, region):
-        for ix, row in self._sub_rows(region):
+    def _region_iter(self, *args, **kwargs):
+        for ix, (index, row) in enumerate(self.iterrows()):
             yield self._row_to_region(row, ix=ix)
+
+    def _region_subset(self, region, *args, **kwargs):
+        df_sub = self.query('chromosome == "{}" and start < {} and end > {}'.format(
+            region.chromosome, region.end, region.start
+        ))
+        for index, row in df_sub.iterrows():
+            yield self._row_to_region(row, ix=index)
+
+    def _region_len(self):
+        return self.shape[0]
+
+    def chromosomes(self):
+        try:
+            return self.chromosome.unique()
+        except AttributeError:
+            raise AttributeError("To support chromosome queries, DataFrame "
+                                 "MUST contain 'chromosome' column")
 
     def _sub_rows(self, region):
         if isinstance(region, string_types):
