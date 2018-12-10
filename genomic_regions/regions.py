@@ -1212,7 +1212,7 @@ class GenomicRegions(RegionBased):
         Add a genomic region to this object.
 
         This method offers some flexibility in the types of objects
-        that can be loaded. See below for details.
+        that can be loaded. See parameters for details.
 
         :param region: Can be a :class:`~GenomicRegion`, a str in the form
                        '<chromosome>:<start>-<end>[:<strand>], a dict with
@@ -1242,7 +1242,8 @@ class GenomicRegions(RegionBased):
             except TypeError:
                 raise ValueError("Node parameter has to be GenomicRegion, dict, or list")
 
-        new_region = GenomicRegion(chromosome=chromosome, start=start, end=end, strand=strand, ix=ix)
+        new_region = GenomicRegion(chromosome=chromosome, start=start, end=end,
+                                   strand=strand, ix=ix)
         return self._add_region(new_region)
 
     def _add_region(self, region):
@@ -1262,8 +1263,8 @@ class GenomicRegions(RegionBased):
         for region in self._regions:
             yield region
 
-    def _get_regions(self, key):
-        return self._regions[key]
+    def _get_regions(self, item, *args, **kwargs):
+        return self._regions[item]
 
     @property
     def chromosome_bins(self):
@@ -1287,17 +1288,35 @@ class GenomicRegions(RegionBased):
 
     @property
     def regions_dict(self):
+        """
+        Return a dictionary with region index as keys
+        and regions as values.
+
+        :return: dict {region.ix: region, ...}
+        """
         regions_dict = dict()
-        for r in self.regions:
-            regions_dict[r.ix] = r
+        for i, r in enumerate(self.regions):
+            regions_dict[getattr(r, 'ix', i)] = r
         return regions_dict
 
     @property
     def bin_size(self):
-        node = self.regions[0]
-        return node.end - node.start + 1
+        """
+        Return the size of the first region in the dataset.
+
+        Assumes all regions have equal size.
+
+        :return: int
+        """
+        return len(self.regions[0]) + 1
 
     def distance_to_bins(self, distance):
+        """
+        Convert base pairs to fraction of bins.
+
+        :param distance: distance in base pairs
+        :return: float, distance as fraction of bin size
+        """
         bin_size = self.bin_size
         bin_distance = int(distance/bin_size)
         if distance % bin_size > 0:
@@ -1305,14 +1324,18 @@ class GenomicRegions(RegionBased):
         return bin_distance
 
     def bins_to_distance(self, bins):
-        return self.bin_size*bins
+        """
+        Convert fraction of bins to base pairs
+
+        :param bins: float, fraction of bins
+        :return: int, base pairs
+        """
+        return int(self.bin_size * bins)
 
 
 class Bed(pybedtools.BedTool, RegionBased):
     """
     Data type representing a BED file.
-
-    Only exists to support 'with' statements
     """
 
     def __init__(self, *args, **kwargs):
