@@ -1336,6 +1336,10 @@ class GenomicRegions(RegionBased):
 class Bed(pybedtools.BedTool, RegionBased):
     """
     Data type representing a BED file.
+
+    Extends :class:`~pybedtools.BedTool` and therefore
+    provides all the methods of the original class, such
+    as intersect, etc.
     """
 
     def __init__(self, *args, **kwargs):
@@ -1433,6 +1437,13 @@ class Bed(pybedtools.BedTool, RegionBased):
         return region
 
     def merge_overlapping(self, stat=intervals_weighted_mean, sort=True):
+        """
+        Merge overlapping BED intervals.
+
+        :param stat: Function to use for scoring the merged interval.
+        :param sort: Sort bed file intervals by position before merging.
+        :return: iterator of merged intervals
+        """
         if sort:
             bed = self
         else:
@@ -1462,6 +1473,15 @@ class Bed(pybedtools.BedTool, RegionBased):
 
 
 class Bedpe(Bed):
+    """
+    Represents a BEDPE file (genomic region pairs).
+
+    Access each region of the pair with
+    chromosome<1|2>
+    start<1|2>
+    end<1|2>
+    strand<1|2>
+    """
     def __init__(self, *args, **kwargs):
         Bed.__init__(self, *args, **kwargs)
 
@@ -1505,6 +1525,12 @@ class Bedpe(Bed):
 
 
 class BigWig(RegionBased):
+    """
+    Represents a BigWig file.
+
+    Forwards function and property calls that do not belong to RegionBased
+    to :class:`~pyBigWig.BigWig`.
+    """
     def __init__(self, bw):
         RegionBased.__init__(self)
         if isinstance(bw, string_types):
@@ -1612,6 +1638,14 @@ class BigWig(RegionBased):
                 for ix in range(max(0, start_ix), min(len(all_intervals[0]), end_ix + 1))]
 
     def region_stats(self, region, bins=1, stat='mean'):
+        """
+        BigWig.stats with region query.
+
+        :param region: :class:`~GenomicRegion`
+        :param bins: Number of bins with stats to return
+        :param stat: name of statistic to use (default: mean)
+        :return: interval stats
+        """
         if isinstance(region, string_types):
             region = GenomicRegion.from_string(region)
 
