@@ -1747,7 +1747,7 @@ class BedRegion(GenomicRegion):
             return None
 
     @property
-    def block_sizes(self):
+    def block_starts(self):
         try:
             return [int(s) for s in self.fields[11].split(',')]
         except IndexError:
