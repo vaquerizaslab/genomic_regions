@@ -1,3 +1,7 @@
+"""
+Module providing randomisation functions for ::class:`~GenomicRegion` objects.
+"""
+
 import os
 import random
 from collections import defaultdict
@@ -9,12 +13,90 @@ from .files import read_chromosome_sizes
 from .regions import GenomicRegion
 
 
-def iter_randomized_regions(original_regions, iterations=1, chromosome_sizes=None, method='unconstrained',
-                            attribute='score',
-                            preserve_attributes=False, sort=False, _chromosome_regions=None):
+def randomize_regions(original_regions, chromosome_sizes=None, method='unconstrained',
+                      attribute='score', preserve_attributes=False, sort=False,
+                      _chromosome_regions=None):
+    """
+    Perform a single randomisation of a list of genomic regions.
+
+    :param original_regions: :class:`~list` of :class:`~GenomicRegion` objects
+    :param chromosome_sizes: Either the path to a <genome>.chrom.sizes file
+                             (e.g. from UCSC) or a genome identifier (e.g. mm10,
+                             hg19, ...). Only necessary when using 'unconstrained'
+                             randomisation.
+    :param method: Type of randomisation.
+                   'unconstrained', which will randomly place regions on the same
+                   chromosome,
+                   'spacing', which will first compile a list of distances between regions,
+                   shuffle the distances and regions independently, and then
+                   alternately place a region and a space on the chromosome. This
+                   changes the order and pairwise distances of region on each
+                   chromosome, but maintains the overall distance distribution.
+                   'attribute': Keeps region locations, but shuffles a specific
+                   region attribute instead (specified by attribute parameter)
+    :param attribute: attribute to shuffle in 'attribute' mode. Default: score
+    :param preserve_attributes: Randomised region will preserve the attributes
+                                of the original regions
+    :param sort: Sort region list before randomising
+    :return: list of randomised regions
+    """
+    random_regions = []
+
     if method == 'unconstrained':
         if chromosome_sizes is None:
             raise ValueError("Must provide chromosome_sizes dict when using unconstrained randomization method")
+        random_regions = _random_regions_unconstrained(original_regions, chromosome_sizes,
+                                                       preserve_attributes=preserve_attributes)
+    elif method == 'spacing':
+        if _chromosome_regions is None:
+            _chromosome_regions = chromosome_regions(original_regions, sort=sort)
+        random_regions = _random_regions_spacing(_chromosome_regions,
+                                                 preserve_attributes=preserve_attributes)
+    elif method == 'attribute':
+        attributes = []
+        for region in original_regions:
+            a = getattr(region, attribute)
+            attributes.append(a)
+        random_regions = _random_regions_attribute(original_regions, attribute=attribute,
+                                                   preserve_attributes=preserve_attributes,
+                                                   _attributes=attributes)
+
+    return random_regions
+
+
+def iter_randomized_regions(original_regions, iterations=1, chromosome_sizes=None,
+                            method='unconstrained', attribute='score',
+                            preserve_attributes=False, sort=False,
+                            _chromosome_regions=None):
+    """
+    Perform a multiple randomisations of a list of genomic regions.
+
+    :param original_regions: :class:`~list` of :class:`~GenomicRegion` objects
+    :param iterations: Number of randomisations to perform
+    :param chromosome_sizes: Either the path to a <genome>.chrom.sizes file
+                             (e.g. from UCSC) or a genome identifier (e.g. mm10,
+                             hg19, ...). Only necessary when using 'unconstrained'
+                             randomisation.
+    :param method: Type of randomisation.
+                   'unconstrained', which will randomly place regions on the same
+                   chromosome,
+                   'spacing', which will first compile a list of distances between regions,
+                   shuffle the distances and regions independently, and then
+                   alternately place a region and a space on the chromosome. This
+                   changes the order and pairwise distances of region on each
+                   chromosome, but maintains the overall distance distribution.
+                   'attribute': Keeps region locations, but shuffles a specific
+                   region attribute instead (specified by attribute parameter)
+    :param attribute: attribute to shuffle in 'attribute' mode. Default: score
+    :param preserve_attributes: Randomised region will preserve the attributes
+                                of the original regions
+    :param sort: Sort region list before randomising
+    :return: iterator over lists of randomised regions
+    """
+    if method == 'unconstrained':
+        if chromosome_sizes is None:
+            raise ValueError("Must provide chromosome_sizes dict when using "
+                             "unconstrained randomization method")
         for i in range(iterations):
             yield _random_regions_unconstrained(original_regions, chromosome_sizes,
                                                 preserve_attributes=preserve_attributes)
@@ -37,25 +119,14 @@ def iter_randomized_regions(original_regions, iterations=1, chromosome_sizes=Non
         raise ValueError("Unknown randomization method '{}'".format(method))
 
 
-def randomize_regions(original_regions, chromosome_sizes=None, method='unconstrained',
-                      preserve_attributes=False, sort=False, _chromosome_regions=None):
-    random_regions = []
-
-    if method == 'unconstrained':
-        if chromosome_sizes is None:
-            raise ValueError("Must provide chromosome_sizes dict when using unconstrained randomization method")
-        random_regions = _random_regions_unconstrained(original_regions, chromosome_sizes,
-                                                       preserve_attributes=preserve_attributes)
-    elif method == 'spacing':
-        if _chromosome_regions is None:
-            _chromosome_regions = chromosome_regions(original_regions, sort=sort)
-        random_regions = _random_regions_spacing(_chromosome_regions,
-                                                 preserve_attributes=preserve_attributes)
-
-    return random_regions
-
-
 def chromosome_regions(original_regions, sort=True):
+    """
+    Divide :class:`~GenomicRegion` objects by chromosome.
+
+    :param original_regions: list of :class:`~GenomicRegion` objects
+    :param sort: If True, will sort regions on chromosome by start coordinate.
+    :return:
+    """
     if not isinstance(original_regions, dict):
         cr = defaultdict(list)
         for region in original_regions:
