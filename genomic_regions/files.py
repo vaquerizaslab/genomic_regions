@@ -1,3 +1,8 @@
+"""
+Module providing functions for working with files
+revolving around :class:`~GenomicRegion` objects.
+"""
+
 import logging
 import os.path
 import pyBigWig
@@ -11,25 +16,9 @@ try:
 except ImportError:
     pass
 import os
-import errno
 
 # configure logging
 logger = logging.getLogger(__name__)
-
-
-def mkdir(dir_name):
-    dir_name = os.path.expanduser(dir_name)
-
-    try:
-        os.makedirs(dir_name)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
-
-    if not dir_name.endswith('/'):
-        dir_name += '/'
-
-    return dir_name
 
 
 def which(program):
@@ -58,6 +47,12 @@ def which(program):
 
 
 def read_chromosome_sizes(file_name):
+    """
+    Obtain chromosome sizes from <genome>.chrom.sizes file (UCSC).
+
+    :param file_name: Path to <genome>.chrom.sizes file
+    :return: :class:`~dict` {chromosome: size, ...}
+    """
     chrom_sizes = {}
     with open(os.path.expanduser(file_name), 'r') as chrom_sizes_file:
         for line in chrom_sizes_file:
@@ -69,6 +64,15 @@ def read_chromosome_sizes(file_name):
 
 
 def write_bed(file_name, regions, mode='w', **kwargs):
+    """
+    Write :class:`~GenomicRegion` objects to BED file.
+
+    :param file_name: Path to output BED file
+    :param regions: :class:`~list` of :class:`~GenomicRegion` objects
+    :param mode: File mode. Default: 'w'
+    :param kwargs: Keyword arguments passed to GenomicRegion.as_bed_line
+    :return: Path to output BED file
+    """
     if file_name == '-':
         bed_file = sys.stdout
         must_close = False
@@ -92,6 +96,15 @@ def write_bed(file_name, regions, mode='w', **kwargs):
 
 
 def write_gff(file_name, regions, mode='w', **kwargs):
+    """
+    Write :class:`~GenomicRegion` objects to GFF file.
+
+    :param file_name: Path to output GFF file
+    :param regions: :class:`~list` of :class:`~GenomicRegion` objects
+    :param mode: File mode. Default: 'w'
+    :param kwargs: Keyword arguments passed to GenomicRegion.as_gff_line
+    :return: Path to output GFF file
+    """
     if file_name == '-':
         gff_file = sys.stdout
         must_close = False
@@ -115,6 +128,15 @@ def write_gff(file_name, regions, mode='w', **kwargs):
 
 
 def write_bigwig(file_name, regions, mode='w', score_field='score'):
+    """
+    Write :class:`~GenomicRegion` objects to BigWig file.
+
+    :param file_name: Path to output BigWig file
+    :param regions: :class:`~list` of :class:`~GenomicRegion` objects
+    :param mode: File mode. Default: 'w'
+    :param score_field: Attribute from each object to use as interval score.
+    :return: Path to output BigWig file
+    """
     logger.debug("Writing output...")
     bw = pyBigWig.open(file_name, mode)
     # write header
