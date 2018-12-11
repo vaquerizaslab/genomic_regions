@@ -1,7 +1,6 @@
 import pytest
 import os
-from genomic_regions.files import write_bed, write_bigwig
-from genomic_regions.helpers import which
+from genomic_regions.files import write_bed, write_bigwig, which
 from genomic_regions import *
 
 
