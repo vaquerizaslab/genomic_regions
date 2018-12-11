@@ -42,7 +42,7 @@ import warnings
 from bisect import bisect_right, bisect_left
 from future.utils import string_types
 from builtins import object
-from pandas import DataFrame, read_table
+import pandas
 import pyBigWig
 import intervaltree
 import logging
@@ -1917,7 +1917,7 @@ class Tabix(RegionBased):
         tabix_command += file_name
 
 
-class GenomicDataFrame(DataFrame, RegionBased):
+class GenomicDataFrame(pandas.DataFrame, RegionBased):
     """
     Represents :class:`~pandas.DataFrame` as regionbased object.
 
@@ -1948,6 +1948,17 @@ class GenomicDataFrame(DataFrame, RegionBased):
 
     def _region_len(self):
         return self.shape[0]
+
+    def _get_regions(self, item, *args, **kwargs):
+        df_sub = self.iloc[item]
+
+        # single row selected
+        if isinstance(df_sub, pandas.Series):
+            return self._row_to_region(df_sub)
+
+        # multiple rows selected
+        return [self._row_to_region(row, ix=index)
+                for index, row in df_sub.iterrows()]
 
     def chromosomes(self):
         try:
@@ -1990,4 +2001,4 @@ class GenomicDataFrame(DataFrame, RegionBased):
 
     @classmethod
     def read_table(cls, file_name, **kwargs):
-        return cls(read_table(file_name, **kwargs))
+        return cls(pandas.read_table(file_name, **kwargs))

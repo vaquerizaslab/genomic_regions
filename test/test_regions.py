@@ -254,6 +254,3 @@ class TestGenomicDataFrame(RegionBasedTestFactory):
         }
 
         self.regions = GenomicDataFrame(data)
-
-    def test_get_item(self):
-        pass
