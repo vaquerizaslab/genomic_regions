@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-===================
-Kai-C documentation
-===================
+=============================
+genomic_regions documentation
+=============================
 
 .. toctree::
    :maxdepth: 3
 
    Getting started with Genomic Regions <getting_started>
+   API <api>
 
 Indices and tables
 ==================
