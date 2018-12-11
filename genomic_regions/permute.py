@@ -13,6 +13,9 @@ from .files import read_chromosome_sizes
 from .regions import GenomicRegion
 
 
+__all__ = ['randomize_regions', 'iter_randomized_regions']
+
+
 def randomize_regions(original_regions, chromosome_sizes=None, method='unconstrained',
                       attribute='score', preserve_attributes=False, sort=False,
                       _chromosome_regions=None):
