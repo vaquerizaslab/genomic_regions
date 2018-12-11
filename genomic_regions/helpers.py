@@ -2,7 +2,6 @@
 Helper functions for working with genomic regions.
 """
 
-import os
 import re
 import numpy as np
 
