@@ -39,7 +39,7 @@ import copy
 import re
 import shlex
 import warnings
-from bisect import bisect_right, bisect_left
+from bisect import bisect_left
 from future.utils import string_types
 from builtins import object
 import pandas
