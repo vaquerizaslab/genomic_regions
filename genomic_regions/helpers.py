@@ -31,7 +31,11 @@ def str_to_int(num_string, decimal_separator='.', thousand_separator=','):
     :param thousand_separator: Thousand separator (to be ignored)
     :return: int (base pairs)
     """
-    num_string = num_string.replace(thousand_separator, '').lower()
+    try:
+        num_string = num_string.replace(thousand_separator, '').lower()
+    except AttributeError:
+        pass
+
     try:
         return int(num_string)
     except ValueError:
