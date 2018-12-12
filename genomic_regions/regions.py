@@ -330,8 +330,7 @@ class GenomicRegion(object):
 
         :param region: :class:`~GenomicRegion` object or string
         """
-        if isinstance(region, string_types):
-            region = GenomicRegion.from_string(region)
+        region = as_region(region)
 
         if region.chromosome != self.chromosome:
             return False
@@ -349,6 +348,8 @@ class GenomicRegion(object):
         :param region: :class:`~GenomicRegion` to find overlap for
         :return: overlap as int in base pairs
         """
+        region = as_region(region)
+
         if region.chromosome != self.chromosome:
             return 0
 
@@ -360,8 +361,7 @@ class GenomicRegion(object):
 
         :param region: :class:`~GenomicRegion` object or string
         """
-        if isinstance(region, string_types):
-            region = GenomicRegion.from_string(region)
+        region = as_region(region)
 
         if region.chromosome != self.chromosome:
             return False
@@ -371,6 +371,8 @@ class GenomicRegion(object):
         return False
 
     def _equals(self, region):
+        region = as_region(region)
+
         if region.chromosome != self.chromosome:
             return False
         if region.start != self.start:
@@ -593,8 +595,8 @@ class GenomicRegion(object):
         if relative is not None:
             relative_left, relative_right = relative, relative
 
-        extend_left_bp = absolute_left + int(relative_left * len(self))
-        extend_right_bp = absolute_right + int(relative_right * len(self))
+        extend_left_bp = str_to_int(absolute_left) + int(relative_left * len(self))
+        extend_right_bp = str_to_int(absolute_right) + int(relative_right * len(self))
 
         new_region = self.copy() if copy else self
         if from_center:
@@ -608,12 +610,12 @@ class GenomicRegion(object):
 
     def __add__(self, distance):
         new_region = self.copy()
-        new_region.start += distance
-        new_region.end += distance
+        new_region.start += str_to_int(distance)
+        new_region.end += str_to_int(distance)
         return new_region
 
     def __sub__(self, distance):
-        return self.__add__(-distance)
+        return self.__add__(-str_to_int(distance))
 
     def fix_chromosome(self, copy=False):
         """
@@ -714,15 +716,7 @@ class RegionBased(object):
 
             def _fix_chromosome(self, regions):
                 for r in regions:
-                    if r.chromosome.startswith('chr'):
-                        r.chromosome = r.chromosome[3:]
-                    else:
-                        try:
-                            r.chromosome = 'chr' + r.chromosome
-                        except AttributeError:
-                            r = r.copy()
-                            r.chromosome = 'chr' + r.chromosome
-                    yield r
+                    r.fix_chromosome(copy=True)
 
             def __call__(self, key=None, *args, **kwargs):
                 fix_chromosome = kwargs.pop('fix_chromosome', False)
@@ -754,7 +748,7 @@ class RegionBased(object):
 
         if isinstance(region, GenomicRegion):
             if region.start is None and self._estimate_region_bounds:
-                region.start = 0
+                region.start = 1
 
             if region.end is None and self._estimate_region_bounds:
                 chromosome_lengths = self.chromosome_lengths
@@ -1048,6 +1042,7 @@ class RegionBased(object):
     @staticmethod
     def _bin_intervals_equidist(intervals, bin_size, interval_range, bins=None, smoothing_window=None,
                                 nan_replacement=None, zero_to_nan=False):
+        bin_size = str_to_int(bin_size)
         if bins is None:
             bins = int((interval_range[1] - interval_range[0] + 1) / bin_size + .5)
 
@@ -1056,12 +1051,16 @@ class RegionBased(object):
         bin_weighted_sum = [0.0] * bins
         bin_weighted_count = [0.0] * bins
         bin_start = interval_range[0]
+        last_start = bin_start
         for bin_counter in range(bins):
             bin_end = int(interval_range[0] + bin_size + (bin_size * bin_counter) + 0.5) - 1
             bin_coordinates.append((bin_start, bin_end))
 
             if current_interval < len(intervals):
                 interval = intervals[current_interval]
+                if last_start > interval[0]:
+                    raise ValueError("Intervals / regions must be sorted by start coordinate for binning!")
+                last_start = interval[0]
             else:
                 interval = None
 
@@ -1168,9 +1167,9 @@ class RegionWrapper(RegionBased):
         region_intervals = defaultdict(list)
 
         self._regions = []
-        for region in regions:
+        for i, region in enumerate(regions):
             self._regions.append(region)
-            interval = intervaltree.Interval(region.start - 1, region.end, data=region)
+            interval = intervaltree.Interval(region.start - 1, region.end, data=(i, region))
             region_intervals[region.chromosome].append(interval)
 
         self.region_trees = {}
@@ -1185,9 +1184,14 @@ class RegionWrapper(RegionBased):
             yield region
 
     def _region_subset(self, region, *args, **kwargs):
+        sort = kwargs.get("sort", False)
         tree = self.region_trees[region.chromosome]
-        for interval in tree[region.start:region.end]:
-            yield interval.data
+        if sort:
+            intervals = sorted(tree[region.start:region.end], key=lambda r: r.begin)
+        else:
+            intervals = sorted(tree[region.start:region.end], key=lambda r: r.data[0])
+        for interval in intervals:
+            yield interval.data[1]
 
     def _region_len(self):
         return len(self._regions)
