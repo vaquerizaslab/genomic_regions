@@ -1172,9 +1172,9 @@ class RegionWrapper(RegionBased):
             interval = intervaltree.Interval(region.start - 1, region.end, data=(i, region))
             region_intervals[region.chromosome].append(interval)
 
-        self.region_trees = {}
+        self._region_trees = {}
         for chromosome, intervals in region_intervals.items():
-            self.region_trees[chromosome] = intervaltree.IntervalTree(intervals)
+            self._region_trees[chromosome] = intervaltree.IntervalTree(intervals)
 
     def _get_regions(self, item, *args, **kwargs):
         return self._regions[item]
@@ -1185,7 +1185,7 @@ class RegionWrapper(RegionBased):
 
     def _region_subset(self, region, *args, **kwargs):
         sort = kwargs.get("sort", False)
-        tree = self.region_trees[region.chromosome]
+        tree = self._region_trees[region.chromosome]
         if sort:
             intervals = sorted(tree[region.start:region.end], key=lambda r: r.begin)
         else:
@@ -1197,7 +1197,7 @@ class RegionWrapper(RegionBased):
         return len(self._regions)
 
     def chromosomes(self):
-        return list(self.region_trees.keys())
+        return list(self._region_trees.keys())
 
 
 class GenomicRegions(RegionBased):
