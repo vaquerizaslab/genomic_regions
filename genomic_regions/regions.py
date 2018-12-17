@@ -51,8 +51,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['GenomicRegion', 'Bed', 'Bedpe', 'RegionWrapper',
            'RegionBased', 'GenomicDataFrame', 'Tabix',
-           'BigWig', 'GenomicRegions', 'as_region', 'load',
-           'merge_regions']
+           'BigWig', 'as_region', 'load', 'merge_regions']
 
 
 def as_region(region):
@@ -671,6 +670,9 @@ class RegionBased(object):
     def _get_regions(self, item, *args, **kwargs):
         raise NotImplementedError("Function not implemented")
 
+    def _add_region(self, region, *args, **kwargs):
+        raise NotImplementedError("Function not implemented")
+
     def _region_subset(self, region, *args, **kwargs):
         return self.regions[self.region_bins(region)]
 
@@ -1121,6 +1123,58 @@ class RegionBased(object):
 
         return tuple((bin_coordinates[i][0], bin_coordinates[i][1], result[i]) for i in range(len(result)))
 
+    def add_region(self, region, *args, **kwargs):
+        """
+        Add a genomic region to this object.
+
+        This method offers some flexibility in the types of objects
+        that can be loaded. See parameters for details.
+
+        :param region: Can be a :class:`~GenomicRegion`, a str in the form
+                       '<chromosome>:<start>-<end>[:<strand>], a dict with
+                       at least the fields 'chromosome', 'start', and
+                       'end', optionally 'ix', or a list of length 3
+                       (chromosome, start, end) or 4 (ix, chromosome,
+                       start, end).
+        """
+        ix = -1
+
+        if isinstance(region, GenomicRegion):
+            return self._add_region(copy.copy(region), *args, **kwargs)
+        elif isinstance(region, string_types):
+            return self._add_region(GenomicRegion.from_string(region), *args, **kwargs)
+        elif type(region) is dict:
+            return self._add_region(GenomicRegion(**copy.copy(region)), *args, **kwargs)
+        else:
+            try:
+                offset = 0
+                if len(region) == 4:
+                    ix = region[0]
+                    offset += 1
+                chromosome = region[offset]
+                start = region[offset + 1]
+                end = region[offset + 2]
+                strand = 1
+            except TypeError:
+                raise ValueError("Node parameter has to be GenomicRegion, dict, or list")
+
+        new_region = GenomicRegion(chromosome=chromosome, start=start, end=end,
+                                   strand=strand, ix=ix)
+        return self._add_region(new_region, *args, **kwargs)
+
+    @property
+    def regions_dict(self):
+        """
+        Return a dictionary with region index as keys
+        and regions as values.
+
+        :return: dict {region.ix: region, ...}
+        """
+        regions_dict = dict()
+        for i, r in enumerate(self.regions):
+            regions_dict[getattr(r, 'ix', i)] = r
+        return regions_dict
+
     def to_bed(self, file_name, subset=None, **kwargs):
         """
         Export regions as BED file
@@ -1164,11 +1218,18 @@ class RegionWrapper(RegionBased):
     """
     def __init__(self, regions):
         super(RegionWrapper, self).__init__()
-        region_intervals = defaultdict(list)
 
         self._regions = []
         for i, region in enumerate(regions):
             self._regions.append(region)
+
+        self._region_trees = {}
+        self._update_trees()
+
+    def _update_trees(self):
+        region_intervals = defaultdict(list)
+
+        for i, region in enumerate(self._regions):
             interval = intervaltree.Interval(region.start - 1, region.end, data=(i, region))
             region_intervals[region.chromosome].append(interval)
 
@@ -1196,145 +1257,13 @@ class RegionWrapper(RegionBased):
     def _region_len(self):
         return len(self._regions)
 
+    def _add_region(self, region, *args, **kwargs):
+        self._regions.append(region)
+        if kwargs.get('flush', True):
+            self._update_trees()
+
     def chromosomes(self):
         return list(self._region_trees.keys())
-
-
-class GenomicRegions(RegionBased):
-
-    def __init__(self, regions=None):
-        RegionBased.__init__(self)
-        self._regions = []
-        self._max_region_ix = -1
-
-        if regions is not None:
-            for region in regions:
-                self.add_region(region)
-
-    def add_region(self, region):
-        """
-        Add a genomic region to this object.
-
-        This method offers some flexibility in the types of objects
-        that can be loaded. See parameters for details.
-
-        :param region: Can be a :class:`~GenomicRegion`, a str in the form
-                       '<chromosome>:<start>-<end>[:<strand>], a dict with
-                       at least the fields 'chromosome', 'start', and
-                       'end', optionally 'ix', or a list of length 3
-                       (chromosome, start, end) or 4 (ix, chromosome,
-                       start, end).
-        """
-        ix = -1
-
-        if isinstance(region, GenomicRegion):
-            return self._add_region(copy.copy(region))
-        elif isinstance(region, string_types):
-            return self._add_region(GenomicRegion.from_string(region))
-        elif type(region) is dict:
-            return self._add_region(GenomicRegion(**copy.copy(region)))
-        else:
-            try:
-                offset = 0
-                if len(region) == 4:
-                    ix = region[0]
-                    offset += 1
-                chromosome = region[offset]
-                start = region[offset + 1]
-                end = region[offset + 2]
-                strand = 1
-            except TypeError:
-                raise ValueError("Node parameter has to be GenomicRegion, dict, or list")
-
-        new_region = GenomicRegion(chromosome=chromosome, start=start, end=end,
-                                   strand=strand, ix=ix)
-        return self._add_region(new_region)
-
-    def _add_region(self, region):
-        region.ix = self._max_region_ix + 1
-
-        self._regions.append(region)
-
-        if region.ix > self._max_region_ix:
-            self._max_region_ix = region.ix
-
-        return self._region_len()
-
-    def _region_len(self):
-        return len(self._regions)
-
-    def _region_iter(self, *args, **kwargs):
-        for region in self._regions:
-            yield region
-
-    def _get_regions(self, item, *args, **kwargs):
-        return self._regions[item]
-
-    @property
-    def chromosome_bins(self):
-        """
-        Returns a dictionary of chromosomes and the start
-        and end index of the bins they cover.
-
-        Returned list is range-compatible, i.e. chromosome
-        bins [0,5] cover chromosomes 1, 2, 3, and 4, not 5.
-        """
-        return self._chromosome_bins()
-
-    def _chromosome_bins(self):
-        chr_bins = {}
-        for r in self.regions:
-            if chr_bins.get(r.chromosome) is None:
-                chr_bins[r.chromosome] = [r.ix, r.ix + 1]
-            else:
-                chr_bins[r.chromosome][1] = r.ix + 1
-        return chr_bins
-
-    @property
-    def regions_dict(self):
-        """
-        Return a dictionary with region index as keys
-        and regions as values.
-
-        :return: dict {region.ix: region, ...}
-        """
-        regions_dict = dict()
-        for i, r in enumerate(self.regions):
-            regions_dict[getattr(r, 'ix', i)] = r
-        return regions_dict
-
-    @property
-    def bin_size(self):
-        """
-        Return the size of the first region in the dataset.
-
-        Assumes all regions have equal size.
-
-        :return: int
-        """
-        return len(self.regions[0]) + 1
-
-    def distance_to_bins(self, distance):
-        """
-        Convert base pairs to fraction of bins.
-
-        :param distance: distance in base pairs
-        :return: float, distance as fraction of bin size
-        """
-        bin_size = self.bin_size
-        bin_distance = int(distance/bin_size)
-        if distance % bin_size > 0:
-            bin_distance += 1
-        return bin_distance
-
-    def bins_to_distance(self, bins):
-        """
-        Convert fraction of bins to base pairs
-
-        :param bins: float, fraction of bins
-        :return: int, base pairs
-        """
-        return int(self.bin_size * bins)
 
 
 class Bed(pybedtools.BedTool, RegionBased):

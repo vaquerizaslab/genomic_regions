@@ -98,7 +98,7 @@ class RegionBasedTestFactory:
         assert len(list(intersect)) == 6
 
 
-class TestGenomicRegions(RegionBasedTestFactory):
+class TestRegionWrapper(RegionBasedTestFactory):
     def setup_method(self, method):
         chromosomes = [
             {'name': 'chr1', 'end': 10000},
@@ -110,8 +110,8 @@ class TestGenomicRegions(RegionBasedTestFactory):
         for chromosome in chromosomes:
             for start in range(1, chromosome["end"] - 1000, 1000):
                 regions.append(GenomicRegion(start=start, end=start + 999, chromosome=chromosome["name"]))
-        self.regions = GenomicRegions(regions)
-        self.empty_regions = GenomicRegions()
+        self.regions = RegionWrapper(regions)
+        self.empty_regions = RegionWrapper([])
 
     def test_add_region(self):
         # GenomicRegion
