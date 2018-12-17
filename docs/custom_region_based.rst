@@ -110,9 +110,9 @@ Due to the use of interval trees, region subsetting is also not very complicated
         for interval in intervals:
             yield interval.data[1]  # iterate over the overlapping regions
 
-**************
-_other methods
-**************
+*************
+other methods
+*************
 
 Finally, we override two additional methods: :code:`_region_len` and :code:`chromosomes`.
 Both of these would normally be calculated by iterating over all regions to obtain
