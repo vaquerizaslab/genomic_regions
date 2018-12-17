@@ -1051,7 +1051,7 @@ class RegionBased(object):
         bin_weighted_sum = [0.0] * bins
         bin_weighted_count = [0.0] * bins
         bin_start = interval_range[0]
-        last_start = bin_start
+        last_start = intervals[0][0]
         for bin_counter in range(bins):
             bin_end = int(interval_range[0] + bin_size + (bin_size * bin_counter) + 0.5) - 1
             bin_coordinates.append((bin_start, bin_end))
