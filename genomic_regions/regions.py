@@ -1187,9 +1187,9 @@ class RegionWrapper(RegionBased):
         sort = kwargs.get("sort", False)
         tree = self._region_trees[region.chromosome]
         if sort:
-            intervals = sorted(tree[region.start:region.end], key=lambda r: r.begin)
+            intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.begin)
         else:
-            intervals = sorted(tree[region.start:region.end], key=lambda r: r.data[0])
+            intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.data[0])
         for interval in intervals:
             yield interval.data[1]
 

@@ -106,7 +106,7 @@ Due to the use of interval trees, region subsetting is also not very complicated
 
         # we sort by the region position int he list here, because that information
         # is lost in intervaltree
-        intervals = sorted(tree[region.start:region.end], key=lambda r: r.data[0])
+        intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.data[0])
         for interval in intervals:
             yield interval.data[1]  # iterate over the overlapping regions
 
