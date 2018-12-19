@@ -726,7 +726,10 @@ class RegionBased(object):
                 if key is None:
                     iterator = self._region_based._region_iter(*args, **kwargs)
                 else:
-                    iterator = self._region_based.subset(key, *args, **kwargs)
+                    if isinstance(key, string_types) or isinstance(key, GenomicRegion):
+                        iterator = self._region_based.region_subset(key, *args, **kwargs)
+                    else:
+                        iterator = self._region_based._get_regions(key, *args, **kwargs)
 
                 if fix_chromosome:
                     return self._fix_chromosome(iterator)
@@ -734,6 +737,8 @@ class RegionBased(object):
                     return iterator
 
             def __getitem__(self, item):
+                if isinstance(item, string_types) or isinstance(item, GenomicRegion):
+                    return self._region_based.region_subset(item)
                 return self._region_based._get_regions(item)
 
         return RegionIter(self)
@@ -862,6 +867,9 @@ class RegionBased(object):
         return hit_regions
 
     def subset(self, region, *args, **kwargs):
+        return self.region_subset(region, *args, **kwargs)
+
+    def region_subset(self, region, *args, **kwargs):
         """
         Takes a class:`~GenomicRegion` and returns all regions that
         overlap with the supplied region.
