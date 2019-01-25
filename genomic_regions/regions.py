@@ -1860,7 +1860,7 @@ class Tabix(RegionBased):
 
 class GenomicDataFrame(pandas.DataFrame, RegionBased):
     """
-    Represents :class:`~pandas.DataFrame` as regionbased object.
+    Represents :class:`~pandas.DataFrame` as RegionBased object.
 
     For full functionality, must contains the columns:
     chromosome
