@@ -44,7 +44,7 @@ You can also easily construct a :class:`~RegionBased` object from existing
     regions = []
     for chromosome in ['chr1', 'chr2']:
         for start in range(1, 10000000, 100000):
-            r = gr.GenomicRegion(chromosome, start, start + 100000,
+            r = gr.GenomicRegion(chromosome, start, start + 99999,
                                  score=(start - 1)/100000)
             regions.append(r)
 
@@ -148,9 +148,9 @@ scores falling into each bin, weighted by the size of the associated region.
     for region in br:
         print(region, region.score)
 
-    # chr1:1-3333334 16.169996634032984
-    # chr1:3333335-6666667 49.3366270640767
-    # chr1:6666668-10000001 82.50000000000001
+    # chr1:1-3333333 16.169993267997317
+    # chr1:3333334-6666666 49.336625414171024
+    # chr1:6666667-9999999 82.49999029411201
 
 Alternatively, you can specify a :code:`bin_size`:
 
@@ -161,9 +161,9 @@ Alternatively, you can specify a :code:`bin_size`:
     for region in br:
         print(region, region.score)
 
-    # chr1:1-3000000 14.499990333423547
-    # chr1:3000001-6000000 43.99999032267116
-    # chr1:6000001-9000000 73.99999032267117
+    # chr1:1-3000000 14.500000000000004
+    # chr1:3000001-6000000 44.50000000000001
+    # chr1:6000001-9000000 74.50000000000001
 
 Note that when choosing a :code:`bin_size` directly, partial bins at the end of the
 interval will be omitted.
