@@ -63,8 +63,9 @@ class RegionBasedTestFactory:
     def test_len(self):
         assert len(self.regions.regions) == 29
 
-    def test_iter(self):
-        region_iter = self.regions.regions
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_iter(self, lazy):
+        region_iter = self.regions.regions(lazy=lazy)
 
         for i, region in enumerate(region_iter):
             start = 1 + i * 1000
@@ -77,6 +78,16 @@ class RegionBasedTestFactory:
                 chromosome = 'chr2'
 
             assert region.chromosome == chromosome
+            assert region.start == start
+
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_region_subset(self, lazy):
+        region_iter = self.regions.regions('chr1', lazy=lazy)
+
+        for i, region in enumerate(region_iter):
+            start = 1 + i * 1000
+
+            assert region.chromosome == 'chr1'
             assert region.start == start
 
     def test_region_bins(self):
@@ -92,9 +103,11 @@ class RegionBasedTestFactory:
         assert bins.start == 9
         assert bins.stop == 15
 
-    def test_subset(self):
+    @pytest.mark.parametrize("lazy", [True, False])
+    def test_subset(self, lazy):
         # this is essentially the same as region_bins
-        intersect = self.regions.subset(GenomicRegion(chromosome='chr1', start=3400, end=8100))
+        intersect = self.regions.subset(GenomicRegion(chromosome='chr1', start=3400, end=8100),
+                                        lazy=lazy)
         assert len(list(intersect)) == 6
 
 

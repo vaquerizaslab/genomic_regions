@@ -242,6 +242,10 @@ class GenomicRegion(object):
         """
         return [name for name in self.__dict__.keys() if not name.startswith('_')]
 
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            self.set_attribute(key, value)
+
     @classmethod
     def from_string(cls, region_string):
         """
@@ -1292,9 +1296,14 @@ class Bed(pybedtools.BedTool, RegionBased):
     def __enter__(self):
         return self
 
-    def _region_iter(self, *args, **kwargs):
+    def _region_iter(self, lazy=False, *args, **kwargs):
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
+
         for interval in self.intervals:
-            yield self._interval_to_region(interval)
+            yield self._interval_to_region(interval, lazy_region=lazy_region)
 
     def _get_regions(self, item, *args, **kwargs):
         if isinstance(item, string_types):
@@ -1324,16 +1333,20 @@ class Bed(pybedtools.BedTool, RegionBased):
             regions.append(region)
         return regions
 
-    def _region_subset(self, region, *args, **kwargs):
+    def _region_subset(self, region, lazy=False, *args, **kwargs):
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
         for interval in self.filter(lambda i: i.chrom == region.chromosome
                                               and i.start <= region.end
                                               and i.end >= region.start):
-            yield self._interval_to_region(interval)
+            yield self._interval_to_region(interval, lazy_region=lazy_region)
 
     def _region_len(self):
         return sum(1 for _ in self.intervals)
 
-    def _interval_to_region(self, interval):
+    def _interval_to_region(self, interval, lazy_region=None):
         try:
             score = float(interval.score)
         except (TypeError, ValueError):
@@ -1369,13 +1382,22 @@ class Bed(pybedtools.BedTool, RegionBased):
             attributes['source'] = interval.fields[1]
             attributes['feature'] = interval.fields[2]
             attributes['frame'] = interval.fields[7] if len(interval.fields) > 7 else '.'
-
-            region = GenomicRegion(**attributes)
         else:
-            region = GenomicRegion(chromosome=interval.chrom, start=interval.start, end=interval.end,
-                                   strand=interval.strand, score=score, fields=interval.fields,
-                                   name=name)
-        return region
+            attributes = {
+                'chromosome': interval.chrom,
+                'start': interval.start,
+                'end': interval.end,
+                'strand': interval.strand,
+                'score': interval.score,
+                'fields': interval.fields,
+                'name': name
+            }
+
+        if lazy_region is None:
+            return GenomicRegion(**attributes)
+        lazy_region.update(**attributes)
+
+        return lazy_region
 
     def merge_overlapping(self, stat=intervals_weighted_mean, sort=True):
         """
@@ -1430,7 +1452,7 @@ class Bedpe(Bed):
     def file_type(self):
         return 'bedpe'
 
-    def _interval_to_region(self, interval):
+    def _interval_to_region(self, interval, lazy_region=None):
         fields = interval.fields
 
         if len(fields) < 6:
@@ -1456,13 +1478,20 @@ class Bedpe(Bed):
         except IndexError:
             strand2 = '.'
 
-        region = GenomicRegion(chromosome=fields[0], start=int(fields[1]), end=int(fields[2]),
-                               chromosome1=fields[0], start1=int(fields[1]), end1=int(fields[2]),
-                               chromosome2=fields[3], start2=int(fields[4]), end2=int(fields[5]),
-                               strand=strand1, strand1=strand1, strand2=strand2,
-                               score=score, fields=fields,
-                               name=name)
-        return region
+        if lazy_region is None:
+            return GenomicRegion(chromosome=fields[0], start=int(fields[1]), end=int(fields[2]),
+                                 chromosome1=fields[0], start1=int(fields[1]), end1=int(fields[2]),
+                                 chromosome2=fields[3], start2=int(fields[4]), end2=int(fields[5]),
+                                 strand=strand1, strand1=strand1, strand2=strand2,
+                                 score=score, fields=fields,
+                                 name=name)
+        lazy_region.update(chromosome=fields[0], start=int(fields[1]), end=int(fields[2]),
+                           chromosome1=fields[0], start1=int(fields[1]), end1=int(fields[2]),
+                           chromosome2=fields[3], start2=int(fields[4]), end2=int(fields[5]),
+                           strand=strand1, strand1=strand1, strand2=strand2,
+                           score=score, fields=fields,
+                           name=name)
+        return lazy_region
 
 
 class BigWig(RegionBased):
@@ -1489,12 +1518,21 @@ class BigWig(RegionBased):
     def __enter__(self):
         return self
 
-    def _region_iter(self, *args, **kwargs):
+    def _region_iter(self, lazy=False, *args, **kwargs):
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
+
         chromosome_lengths = self.chromosome_lengths
         chromosomes = self.chromosomes()
         for chromosome in chromosomes:
             for start, end, score in self.bw.intervals(chromosome, 1, chromosome_lengths[chromosome]):
-                yield GenomicRegion(chromosome=chromosome, start=start + 1, end=end, score=score)
+                if lazy_region is None:
+                    yield GenomicRegion(chromosome=chromosome, start=start + 1, end=end, score=score)
+                else:
+                    lazy_region.update(chromosome=chromosome, start=start + 1, end=end, score=score)
+                    yield lazy_region
 
     def _get_regions(self, item, *args, **kwargs):
         if isinstance(item, string_types):
@@ -1505,15 +1543,24 @@ class BigWig(RegionBased):
 
         return self.subset(item)
 
-    def _region_subset(self, region, *args, **kwargs):
+    def _region_subset(self, region, lazy=False, *args, **kwargs):
         if isinstance(region, GenomicRegion):
             regions = [region]
         else:
             regions = region
 
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
+
         for r in regions:
             for start, end, score in self.region_intervals(r):
-                yield GenomicRegion(chromosome=r.chromosome, start=start, end=end, score=score)
+                if lazy_region is None:
+                    yield GenomicRegion(chromosome=r.chromosome, start=start, end=end, score=score)
+                else:
+                    lazy_region.update(chromosome=r.chromosome, start=start, end=end, score=score)
+                    yield lazy_region
 
     def _region_intervals(self, region, *args, **kwargs):
         if self._intervals is None:
@@ -1575,7 +1622,8 @@ class BigWig(RegionBased):
     def _memory_intervals(self, region):
         chromosome_intervals = self._intervals[region.chromosome]
         return [(interval.begin, interval.end, interval.data)
-                for interval in chromosome_intervals[region.start - 1:region.end]]
+                for interval in sorted(chromosome_intervals[region.start - 1:region.end],
+                                       key=lambda r: r[0])]
 
     def region_stats(self, region, bins=1, stat='mean'):
         """
@@ -1834,7 +1882,7 @@ class Tabix(RegionBased):
 
     def _region_iter(self, *args, **kwargs):
         for chromosome in self.chromosomes():
-            for region in self.subset(chromosome):
+            for region in self.region_subset(chromosome):
                 yield region
 
     def _region_subset(self, region, *args, **kwargs):
@@ -1868,24 +1916,38 @@ class GenomicDataFrame(pandas.DataFrame, RegionBased):
     end
 
     """
+    def __init__(self, *args, **kwargs):
+        RegionBased.__init__(self)
+        pandas.DataFrame.__init__(self, *args, **kwargs)
+
     @property
     def _estimate_region_bounds(self):
-        return False
+        return True
 
     @property
     def file_type(self):
         return "dataframe"
 
-    def _region_iter(self, *args, **kwargs):
-        for ix, (index, row) in enumerate(self.iterrows()):
-            yield self._row_to_region(row, ix=ix)
+    def _region_iter(self, lazy=False, *args, **kwargs):
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
 
-    def _region_subset(self, region, *args, **kwargs):
+        for ix, (index, row) in enumerate(self.iterrows()):
+            yield self._row_to_region(row, ix=ix, lazy_region=lazy_region)
+
+    def _region_subset(self, region, lazy=False, *args, **kwargs):
+        if lazy:
+            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+        else:
+            lazy_region = None
+
         df_sub = self.query('chromosome == "{}" and start < {} and end > {}'.format(
             region.chromosome, region.end, region.start
         ))
         for index, row in df_sub.iterrows():
-            yield self._row_to_region(row, ix=index)
+            yield self._row_to_region(row, ix=index, lazy_region=lazy_region)
 
     def _region_len(self):
         return self.shape[0]
@@ -1934,11 +1996,14 @@ class GenomicDataFrame(pandas.DataFrame, RegionBased):
             for ix, row in sub_df.iterrows():
                 yield ix, row
 
-    def _row_to_region(self, row, ix=None):
+    def _row_to_region(self, row, ix=None, lazy_region=None):
         attributes = {'ix': ix}
         for key, value in row.items():
             attributes[key] = value
-        return GenomicRegion(**attributes)
+        if lazy_region is None:
+            return GenomicRegion(**attributes)
+        lazy_region.update(**attributes)
+        return lazy_region
 
     @classmethod
     def read_table(cls, file_name, **kwargs):
