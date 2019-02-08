@@ -211,7 +211,7 @@ class GenomicRegion(object):
             strand = 1
         elif strand == "-":
             strand = -1
-        elif strand == "0" or strand == ".":
+        elif strand == 0 or strand == "0" or strand == ".":
             strand = None
         self.strand = strand
         self.chromosome = chromosome.decode() if isinstance(chromosome, bytes) else chromosome
@@ -479,13 +479,11 @@ class GenomicRegion(object):
         try:
             score = getattr(self, score_field)
         except AttributeError:
-            warnings.warn("Score field {} does not exist, using '.'".format(score_field))
             score = '.'
 
         try:
             name = getattr(self, name_field)
         except AttributeError:
-            warnings.warn("Name field {} does not exist, using '.'".format(name_field))
             name = '.'
 
         return "{}\t{}\t{}\t{}\t{}\t{}".format(self.chromosome, self.start, self.end,
@@ -511,25 +509,21 @@ class GenomicRegion(object):
         try:
             source = getattr(self, source_field)
         except AttributeError:
-            warnings.warn("Source field {} does not exist, using '.'".format(source_field))
             source = '.'
 
         try:
             feature = getattr(self, feature_field)
         except AttributeError:
-            warnings.warn("Feature field {} does not exist, using '.'".format(feature_field))
             feature = '.'
 
         try:
             score = "{:{float_format}}".format(getattr(self, score_field), float_format=float_format)
         except AttributeError:
-            warnings.warn("Score field {} does not exist, using '.'".format(score_field))
             score = '.'
 
         try:
             frame = getattr(self, frame_field)
         except AttributeError:
-            warnings.warn("Frame field {} does not exist, using '.'".format(frame_field))
             frame = '.'
 
         no_group_items = {'start', 'end', 'chromosome', 'source', 'feature', 'score',
@@ -680,10 +674,10 @@ class RegionBased(object):
     def _region_subset(self, region, *args, **kwargs):
         return self.regions[self.region_bins(region)]
 
-    def _region_intervals(self, region, *args, **kwargs):
+    def _region_intervals(self, region, score_field='score', *args, **kwargs):
         intervals = []
         for region in self.regions(region, *args, **kwargs):
-            intervals.append((region.start, region.end, region.score))
+            intervals.append((region.start, region.end, getattr(region, score_field)))
         return intervals
 
     def _region_len(self):
@@ -886,7 +880,8 @@ class RegionBased(object):
         return self._region_subset(region, *args, **kwargs)
 
     def region_intervals(self, region, bins=None, bin_size=None, smoothing_window=None,
-                         nan_replacement=None, zero_to_nan=False, *args, **kwargs):
+                         nan_replacement=None, zero_to_nan=False, score_field='score',
+                         *args, **kwargs):
         """
         Return equally-sized genomic intervals and associated scores.
 
@@ -909,7 +904,7 @@ class RegionBased(object):
         if not isinstance(region, GenomicRegion):
             raise ValueError("Region must be a GenomicRegion object or equivalent string!")
 
-        raw_intervals = self._region_intervals(region, *args, **kwargs)
+        raw_intervals = self._region_intervals(region, score_field=score_field, *args, **kwargs)
 
         if raw_intervals is None:
             raw_intervals = []
@@ -1367,6 +1362,12 @@ class Bed(pybedtools.BedTool, RegionBased):
             warnings.warn("Pybedtools could not retrieve interval name. Continuing anyways.")
             name = None
 
+        strand = None
+        if strand == '+':
+            strand = 1
+        elif strand == '-':
+            strand = -1
+
         if self.intervals.file_type == 'gff':
             try:
                 attributes = {key: value for key, value in interval.attrs.items()}
@@ -1376,7 +1377,7 @@ class Bed(pybedtools.BedTool, RegionBased):
             attributes['chromosome'] = interval.chrom
             attributes['start'] = interval.start
             attributes['end'] = interval.end
-            attributes['strand'] = interval.strand
+            attributes['strand'] = strand
             attributes['score'] = score
             attributes['fields'] = interval.fields
             attributes['source'] = interval.fields[1]
@@ -1387,7 +1388,7 @@ class Bed(pybedtools.BedTool, RegionBased):
                 'chromosome': interval.chrom,
                 'start': interval.start,
                 'end': interval.end,
-                'strand': interval.strand,
+                'strand': strand,
                 'score': interval.score,
                 'fields': interval.fields,
                 'name': name
