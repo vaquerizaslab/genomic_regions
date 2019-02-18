@@ -1389,7 +1389,7 @@ class Bed(pybedtools.BedTool, RegionBased):
                 'start': interval.start,
                 'end': interval.end,
                 'strand': strand,
-                'score': interval.score,
+                'score': score,
                 'fields': interval.fields,
                 'name': name
             }
