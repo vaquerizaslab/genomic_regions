@@ -15,8 +15,8 @@ what type of genomic regions file the user currently works with (BED, GFF,
 BigWig, Tabix, ...).
 
 Most of the time, is is enough to open a file with :func:`load` - the module
-will figure out the underlying file type automatically. Refer to the
-documentation for details.
+will figure out the underlying file type automatically. Please refer to the
+documentation for further details.
 """
 
 from __future__ import division, print_function
@@ -51,12 +51,23 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['GenomicRegion', 'Bed', 'Bedpe', 'RegionWrapper',
            'RegionBased', 'GenomicDataFrame', 'Tabix',
-           'BigWig', 'as_region', 'load', 'merge_regions']
+           'BigWig', 'as_region', 'load', 'merge_overlapping_regions']
 
 
 def as_region(region):
     """
     Convert string to :class:`~GenomicRegion`.
+
+    This function attempts to convert any string passed to it
+    to a :class:`~GenomicRegion`. Strings are expected to be
+    of the form <chromosome>[:<start>-<end>[:[strand]], e.g.
+    chr1:1-1000, 2:2mb-5mb:-, chrX:1.5kb-3mb, ...
+
+    Numbers can be abbreviated as '12k', '1.5Mb', etc.
+
+    When fed a :class:`~GenomicRegion`, it will simply be
+    returned, making the use of this function as an
+    "if-necessary" converter possible.
 
     :param region: str or :class:`~GenomicRegion`
     :return: :class:`~GenomicRegion`
@@ -68,9 +79,13 @@ def as_region(region):
     raise ValueError("region parameter cannot be converted to GenomicRegion!")
 
 
-def merge_regions(regions):
+def merge_overlapping_regions(regions):
     """
     Merge overlapping regions in list.
+
+    Provided with a list of :class:`~GenomicRegion` objects,
+    this function will determine overlapping regions and merge
+    them. The output is a list of non-overlapping regions.
 
     :param regions: :class:`list` of :class:`~GenomicRegion` objects
     :return: :class:`list` of merged :class:`~GenomicRegion` objects
@@ -107,10 +122,22 @@ def load(file_name, *args, **kwargs):
     """
     Open file containing genomic regions as :class:`~RegionBased` object.
 
+    'Magic' function that wraps a file containing genomic regions in a
+    :class:`~RegionBased` interface, thus providing the same methods
+    to different types of genomic data formats.
+
+    Compatible formats include: BED, GFF/GTF, BigWig, and Tabix (i.e. BED,
+    GFF, and compatible files index with tabix).
+
+    SAM files are also detected, but opened using pysam.AlignmentFile,
+    so they are not compatiable with the :class:`~RegionBased` interface
+    (yet).
+
     :param file_name: Path to genomic regions file
     :param args: Additional arguments passed to downstream class
     :param kwargs: Additional keyword arguments passed to downstream class
     :return: :class:`~RegionBased`
+    :raises: ValueError if file type not supported
     """
     import os
     file_name = os.path.expanduser(file_name)
@@ -225,6 +252,8 @@ class GenomicRegion(object):
         Safely set an attribute on the :class:`~GenomicRegion` object.
 
         This automatically decodes bytes objects into UTF-8 strings.
+        If you do not care about this, you can also use
+        region.<attribute> = <value> directly.
 
         :param attribute: Name of the attribute to be set
         :param value: Value of the attribute to be set
@@ -273,7 +302,8 @@ class GenomicRegion(object):
         fields = no_space_region_string.split(':')
 
         if len(fields) > 3:
-            raise ValueError("Genomic range string must be of the form <chromosome>[:<start>-<end>:[<strand>]]")
+            raise ValueError("Genomic range string must be of the form "
+                             "<chromosome>[:<start>-<end>:[<strand>]]")
 
         # there is chromosome information
         if len(fields) > 0:
@@ -374,6 +404,16 @@ class GenomicRegion(object):
         return False
 
     def _equals(self, region):
+        """
+        Is this region in the same location as another region?
+
+        Checks if chromosome, start, end, and strand are equal
+        between this object and another :class:`~GenomicRegion`
+
+        :param region: :class:`~GenomicRegion`
+        :return: True if equal, False if not
+        """
+
         region = as_region(region)
 
         if region.chromosome != self.chromosome:
@@ -388,7 +428,8 @@ class GenomicRegion(object):
 
     def is_reverse(self):
         """
-        Return True if this region is on the reverse strand of the reference.
+        Return True if this region is on the reverse strand
+        of the reference genome.
 
         :return: True if on '-' strand, False otherwise.
         """
@@ -398,7 +439,8 @@ class GenomicRegion(object):
 
     def is_forward(self):
         """
-        Return True if this region is on the forward strand of the reference.
+        Return True if this region is on the forward strand
+        of the reference genome.
 
         :return: True if on '+' strand, False otherwise.
         """
@@ -446,7 +488,7 @@ class GenomicRegion(object):
 
         :return: int
         """
-        return self.end if self.is_forward() else self.start
+        return self.start if self.is_reverse() else self.end
 
     def copy(self):
         """
