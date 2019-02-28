@@ -1189,7 +1189,7 @@ class RegionBased(object):
         ix = -1
 
         if isinstance(region, GenomicRegion):
-            return self._add_region(copy.copy(region), *args, **kwargs)
+            return self._add_region(region.copy(), *args, **kwargs)
         elif isinstance(region, string_types):
             return self._add_region(GenomicRegion.from_string(region), *args, **kwargs)
         elif type(region) is dict:
