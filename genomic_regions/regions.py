@@ -600,7 +600,7 @@ class GenomicRegion(object):
                          sides. New region start will be
                          <old start - absolute>, new region end
                          will be <old end + absolute>
-        :param relative: Relative amount in base pairs by which to
+        :param relative: Relative amount as fraction of region by which to
                          expand the region represented by this
                          :class:`~GenomicRegion` object on both
                          sides. New region start will be
