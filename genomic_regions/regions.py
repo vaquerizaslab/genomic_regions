@@ -1405,9 +1405,9 @@ class Bed(pybedtools.BedTool, RegionBased):
             name = None
 
         strand = None
-        if strand == '+':
+        if interval.strand == '+':
             strand = 1
-        elif strand == '-':
+        elif interval.strand == '-':
             strand = -1
 
         if self.intervals.file_type == 'gff':
