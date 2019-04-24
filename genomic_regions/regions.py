@@ -640,10 +640,10 @@ class GenomicRegion(object):
         new_region = self.copy() if copy else self
         if from_center:
             center = self.center
-            new_region.start = int(center) - extend_left_bp
+            new_region.start = max(0, int(center) - extend_left_bp)
             new_region.end = int(center) + extend_right_bp
         else:
-            new_region.start = int(self.start) - extend_left_bp
+            new_region.start = max(0, int(self.start) - extend_left_bp)
             new_region.end = int(self.end) + extend_right_bp
         return new_region
 
@@ -1315,6 +1315,83 @@ class RegionWrapper(RegionBased):
         return list(self._region_trees.keys())
 
 
+class PbtRegion(GenomicRegion):
+    def __init__(self, interval):
+        self._interval = interval
+
+    def __getattr__(self, item):
+        return getattr(self._interval, item)
+
+    @property
+    def chromosome(self):
+        return self._interval.chrom
+
+    @property
+    def strand(self):
+        if self._interval.strand == '+':
+            return 1
+        elif self._interval.strand == '-':
+            return -1
+        return None
+
+    @property
+    def score(self):
+        try:
+            return float(self._interval.score)
+        except (TypeError, ValueError):
+            pass
+
+        if len(self._interval.fields) == 4:  # likely bedGraph!
+            try:
+                return float(self._interval.fields[3])
+            except ValueError:
+                pass
+
+        return np.nan
+
+    @property
+    def name(self):
+        try:
+            return self._interval.name
+        except (TypeError, ValueError):
+            warnings.warn("Pybedtools could not retrieve interval name. Continuing anyways.")
+        return None
+
+    @property
+    def source(self):
+        if self._interval.file_type == 'gff':
+            return self._interval.fields[1]
+        return None
+
+    @property
+    def feature(self):
+        if self._interval.file_type == 'gff':
+            return self._interval.fields[2]
+        return None
+
+    @property
+    def frame(self):
+        return self._interval.fields[7] if len(self._interval.fields) > 7 else '.'
+
+    @property
+    def attributes(self):
+        a = set(self.attrs.keys())
+        a.add('chromosome')
+        a.add('start')
+        a.add('end')
+        a.add('strand')
+        a.add('score')
+        a.add('name')
+        a.add('source')
+        a.add('feature')
+        a.add('frame')
+        return list(a)
+
+    def expand(self, *args, **kwargs):
+        kwargs['copy'] = True
+        return GenomicRegion.expand(self, *args, **kwargs)
+
+
 class Bed(pybedtools.BedTool, RegionBased):
     """
     Data type representing a BED file.
@@ -1335,7 +1412,7 @@ class Bed(pybedtools.BedTool, RegionBased):
 
     def _region_iter(self, lazy=False, *args, **kwargs):
         if lazy:
-            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+            lazy_region = PbtRegion(None)
         else:
             lazy_region = None
 
@@ -1372,7 +1449,7 @@ class Bed(pybedtools.BedTool, RegionBased):
 
     def _region_subset(self, region, lazy=False, *args, **kwargs):
         if lazy:
-            lazy_region = GenomicRegion(chromosome=None, start=0, end=0)
+            lazy_region = PbtRegion(None)
         else:
             lazy_region = None
         for interval in self.filter(lambda i: i.chrom == region.chromosome
@@ -1384,63 +1461,11 @@ class Bed(pybedtools.BedTool, RegionBased):
         return sum(1 for _ in self.intervals)
 
     def _interval_to_region(self, interval, lazy_region=None):
-        try:
-            score = float(interval.score)
-        except (TypeError, ValueError):
-            score = None
-
-        if score is None:
-            if len(interval.fields) == 4:  # likely bedGraph!
-                try:
-                    score = float(interval.fields[3])
-                except ValueError:
-                    score = np.nan
-            else:
-                score = np.nan
-
-        try:
-            name = interval.name
-        except (TypeError, ValueError):
-            warnings.warn("Pybedtools could not retrieve interval name. Continuing anyways.")
-            name = None
-
-        strand = None
-        if interval.strand == '+':
-            strand = 1
-        elif interval.strand == '-':
-            strand = -1
-
-        if self.intervals.file_type == 'gff':
-            try:
-                attributes = {key: value for key, value in interval.attrs.items()}
-            except ValueError:
-                attributes = {}
-
-            attributes['chromosome'] = interval.chrom
-            attributes['start'] = interval.start
-            attributes['end'] = interval.end
-            attributes['strand'] = strand
-            attributes['score'] = score
-            attributes['fields'] = interval.fields
-            attributes['source'] = interval.fields[1]
-            attributes['feature'] = interval.fields[2]
-            attributes['frame'] = interval.fields[7] if len(interval.fields) > 7 else '.'
-        else:
-            attributes = {
-                'chromosome': interval.chrom,
-                'start': interval.start,
-                'end': interval.end,
-                'strand': strand,
-                'score': score,
-                'fields': interval.fields,
-                'name': name
-            }
-
         if lazy_region is None:
-            return GenomicRegion(**attributes)
-        lazy_region.update(**attributes)
-
-        return lazy_region
+            return PbtRegion(interval)
+        else:
+            lazy_region._interval = interval
+            return lazy_region
 
     def merge_overlapping(self, stat=intervals_weighted_mean, sort=True):
         """
