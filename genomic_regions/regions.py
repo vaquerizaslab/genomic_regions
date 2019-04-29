@@ -717,6 +717,7 @@ class RegionBased(object):
         return self.regions[self.region_bins(region)]
 
     def _region_intervals(self, region, score_field='score', *args, **kwargs):
+        kwargs.setdefault('lazy', True)
         intervals = []
         for region in self.regions(region, *args, **kwargs):
             intervals.append((region.start, region.end, getattr(region, score_field)))
