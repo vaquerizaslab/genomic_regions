@@ -823,7 +823,7 @@ class RegionBased(object):
         in bp.
         """
         chr_lens = {}
-        for r in self.regions:
+        for r in self.regions(lazy=True):
             if chr_lens.get(r.chromosome) is None:
                 chr_lens[r.chromosome] = r.end
                 continue
