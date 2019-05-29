@@ -36,7 +36,7 @@ setup(
         'pyBigWig',
         'intervaltree',
     ],
-    # scripts=[],
+    scripts=['bin/convert-regions'],
     cmdclass={
         'clean': CleanCommand
     }

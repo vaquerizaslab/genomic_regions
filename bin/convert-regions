@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import genomic_regions as gr
+from genomic_regions import files
+import pybedtools.helpers
+from future.utils import string_types
+import shutil
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Print log files.'
+    )
+
+    parser.add_argument(
+        'input',
+        help='Input file'
+    )
+
+    parser.add_argument(
+        'output',
+        nargs='?',
+        help='Output file'
+    )
+
+    parser.add_argument(
+        '-o', '--output-format', dest='output_format',
+        default='bw',
+        help='Output format (bed (BED), '
+             'bigwig (BigWig), bw (BigWig), '
+             'gff (GFF)'
+    )
+
+    parser.add_argument(
+        '-c', '--chromosome-sizes', dest='chromosome_sizes',
+        help='Genome identifier (mm10, hg38, ...) or chrom.sizes file'
+    )
+
+    parser.add_argument(
+        '-s', '--subset', dest='subset',
+        help='Regions subset identifier of the form <chr>[:<start>-<end>]'
+    )
+
+    parser.add_argument(
+        '-f', '--force-overwrite', dest='force',
+        default=False,
+        action='store_true',
+        help='Force overwriting of existing output file'
+    )
+
+    parser.add_argument(
+        '-tmp', '--work-in-tmp', dest='tmp',
+        action='store_true',
+        default=False,
+        help='''Work in temporary directory'''
+    )
+
+    args = parser.parse_args()
+
+    input_file = os.path.expanduser(args.input)
+    output_format = args.output_format.lower()
+    output_file = None
+    if args.output is not None:
+        output_file = os.path.expanduser(args.output)
+    else:
+        input_base = os.path.splitext(input_file)[0]
+        if output_format in ('bw', 'bigwig'):
+            output_file = input_base + '.bw'
+        elif output_format in ('bed',):
+            output_file = input_base + '.bed'
+        elif output_format in ('gff', 'gtf'):
+            output_file = input_base + '.gff'
+        else:
+            parser.error("Unknown output format '{}'".format(output_format))
+    subset = args.subset
+    force = args.force
+    tmp = args.tmp
+
+    chromosome_sizes = os.path.expanduser(args.chromosome_sizes) if args.chromosome_sizes is not None else None
+
+    if os.path.exists(output_file) and not force:
+        parser.error("Output file {} already exists - use -f to override!".format(output_file))
+
+    if chromosome_sizes is not None and os.path.isfile(chromosome_sizes):
+        chromosome_sizes = files.read_chromosome_sizes(chromosome_sizes)
+    elif isinstance(chromosome_sizes, string_types):
+        chromosome_sizes = {chromosome: size[1]
+                            for chromosome, size
+                            in pybedtools.helpers.chromsizes(chromosome_sizes).items()}
+
+    original_output_file = None
+    try:
+        if tmp:
+            tmp = False
+            original_output_file = output_file
+            output_file = files.create_temporary_output(original_output_file)
+            input_file = files.create_temporary_copy(input_file)
+            logger.info("Reading from temporary input {}".format(input_file))
+            logger.info("Writing to temporary output {}".format(output_file))
+            tmp = True
+        input_regions = gr.load(input_file)
+
+        if output_format in ('bw', 'bigwig'):
+            input_regions.to_bigwig(output_file, subset=subset, chromosome_sizes=chromosome_sizes)
+        elif output_format in ('bed',):
+            input_regions.to_bed(output_file, subset=subset)
+        elif output_format in ('gff', 'gtf'):
+            input_regions.to_gff(output_file, subset=subset)
+        else:
+            parser.error("Unknown output format '{}'".format(output_format))
+    finally:
+        if original_output_file is not None:
+            logger.info("Copying temporary output to final "
+                        "destination {}".format(original_output_file))
+            shutil.copy(output_file, original_output_file)
+            logger.info("Cleaning temporary files")
+            os.remove(output_file)
+            os.remove(input_file)
+
+
+if __name__ == '__main__':
+    main()
