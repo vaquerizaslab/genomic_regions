@@ -1234,7 +1234,7 @@ class RegionBased(object):
                        write only regions overlapping this region
         :param kwargs: Passed to :func:`write_bed`
         """
-        write_bed(file_name, self.regions(subset), **kwargs)
+        write_bed(file_name, self.regions(subset, lazy=True), **kwargs)
 
     def to_gff(self, file_name, subset=None, **kwargs):
         """
@@ -1245,7 +1245,7 @@ class RegionBased(object):
                        write only regions overlapping this region
         :param kwargs: Passed to :func:`write_gff`
         """
-        write_gff(file_name, self.regions(subset), **kwargs)
+        write_gff(file_name, self.regions(subset, lazy=True), **kwargs)
 
     def to_bigwig(self, file_name, subset=None, **kwargs):
         """
@@ -1256,7 +1256,7 @@ class RegionBased(object):
                        write only regions overlapping this region
         :param kwargs: Passed to :func:`write_bigwig`
         """
-        write_bigwig(file_name, self.regions(subset), mode='w', **kwargs)
+        write_bigwig(file_name, self.regions(subset, lazy=True), mode='w', **kwargs)
 
 
 class RegionWrapper(RegionBased):
@@ -1296,13 +1296,16 @@ class RegionWrapper(RegionBased):
 
     def _region_subset(self, region, *args, **kwargs):
         sort = kwargs.get("sort", False)
-        tree = self._region_trees[region.chromosome]
-        if sort:
-            intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.begin)
-        else:
-            intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.data[0])
-        for interval in intervals:
-            yield interval.data[1]
+        try:
+            tree = self._region_trees[region.chromosome]
+            if sort:
+                intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.begin)
+            else:
+                intervals = sorted(tree[region.start - 1:region.end], key=lambda r: r.data[0])
+            for interval in intervals:
+                yield interval.data[1]
+        except KeyError:
+            pass
 
     def _region_len(self):
         return len(self._regions)
@@ -1321,7 +1324,10 @@ class PbtRegion(GenomicRegion):
         self._interval = interval
 
     def __getattr__(self, item):
-        return getattr(self._interval, item)
+        try:
+            return self._interval.attrs[item]
+        except KeyError:
+            return getattr(self._interval, item)
 
     @property
     def chromosome(self):
