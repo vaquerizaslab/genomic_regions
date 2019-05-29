@@ -8,6 +8,8 @@ import os.path
 import pyBigWig
 import sys
 from collections import defaultdict
+import tempfile
+import shutil
 
 import numpy as np
 
@@ -19,6 +21,36 @@ import os
 
 # configure logging
 logger = logging.getLogger(__name__)
+
+
+def create_temporary_copy(src_file_name, preserve_extension=True):
+    """
+    Copies the source file into a temporary file.
+    Returns a _TemporaryFileWrapper, whose destructor deletes the temp file
+    (i.e. the temp file is deleted when the object goes out of scope).
+    """
+    src_file_name = os.path.expanduser(src_file_name)
+    tf_suffix = ''
+    if preserve_extension:
+        _, tf_suffix = os.path.splitext(src_file_name)
+    tf = tempfile.NamedTemporaryFile(suffix=tf_suffix, delete=False)
+    shutil.copy2(src_file_name, tf.name)
+
+    logger.debug("Working from temporary output file: {}. "
+                 "Original file: {}".format(tf.name, src_file_name))
+
+    return tf.name
+
+
+def create_temporary_output(original_file_name, preserve_extension=True):
+    tf_suffix = ''
+    if preserve_extension:
+        _, tf_suffix = os.path.splitext(original_file_name)
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=tf_suffix)
+    tmp_file.close()
+    logger.debug("Working from temporary output file: {}. "
+                 "Original file: {}".format(tmp_file.name, original_file_name))
+    return tmp_file.name
 
 
 def which(program):
@@ -127,7 +159,8 @@ def write_gff(file_name, regions, mode='w', **kwargs):
     return file_name
 
 
-def write_bigwig(file_name, regions, mode='w', score_field='score'):
+def write_bigwig(file_name, regions, mode='w', score_field='score',
+                 chromosome_sizes=None):
     """
     Write :class:`~GenomicRegion` objects to BigWig file.
 
@@ -135,6 +168,7 @@ def write_bigwig(file_name, regions, mode='w', score_field='score'):
     :param regions: :class:`~list` of :class:`~GenomicRegion` objects
     :param mode: File mode. Default: 'w'
     :param score_field: Attribute from each object to use as interval score.
+    :param chromosome_sizes: Dictionary of the form {chromosome: size}
     :return: Path to output BigWig file
     """
     logger.debug("Writing output...")
@@ -167,9 +201,12 @@ def write_bigwig(file_name, regions, mode='w', score_field='score'):
             score = np.nan
         interval_values.append(score)
 
+    if chromosome_sizes is None:
+        chromosome_sizes = chromosome_lengths
+
     header = []
     for chromosome in chromosomes:
-        chromosome_length = chromosome_lengths[chromosome]
+        chromosome_length = chromosome_sizes[chromosome]
         header.append((chromosome, chromosome_length))
     bw.addHeader(header)
 
