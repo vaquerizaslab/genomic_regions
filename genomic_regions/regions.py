@@ -1378,7 +1378,8 @@ class PbtRegion(GenomicRegion):
 
     @property
     def frame(self):
-        return self._interval.fields[7] if len(self._interval.fields) > 7 else '.'
+        if self._interval.file_type == 'gff':
+            return self._interval.fields[7] if len(self._interval.fields) > 7 else '.'
 
     @property
     def attributes(self):
@@ -1389,9 +1390,10 @@ class PbtRegion(GenomicRegion):
         a.add('strand')
         a.add('score')
         a.add('name')
-        a.add('source')
-        a.add('feature')
-        a.add('frame')
+        if self._interval.file_type == 'gff':
+            a.add('source')
+            a.add('feature')
+            a.add('frame')
         return list(a)
 
     def expand(self, *args, **kwargs):

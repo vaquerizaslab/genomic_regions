@@ -30,7 +30,7 @@ setup(
     install_requires=[
         'pandas',
         'numpy',
-        'pybedtools',
+        'pybedtools>=0.8.0',
         'pysam',
         'future',
         'pyBigWig',
