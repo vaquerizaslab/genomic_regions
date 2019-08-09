@@ -1258,6 +1258,22 @@ class RegionBased(object):
         """
         write_bigwig(file_name, self.regions(subset, lazy=True), mode='w', **kwargs)
 
+    def contains(self, region, full=False):
+        region = as_region(region)
+        hits = 0
+        if full:
+            for r in self.regions(region, lazy=True):
+                if r.contains(region):
+                    hits += 1
+        else:
+            for _ in self.regions(region, lazy=True):
+                hits += 1
+
+        return hits > 0
+
+    def __contains__(self, item):
+        return self.contains(item)
+
 
 class RegionWrapper(RegionBased):
     """
