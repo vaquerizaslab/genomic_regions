@@ -10,6 +10,8 @@ import sys
 from collections import defaultdict
 import tempfile
 import shutil
+import pysam
+import subprocess
 
 import numpy as np
 
@@ -214,3 +216,36 @@ def write_bigwig(file_name, regions, mode='w', score_field='score',
 
     bw.close()
     return file_name
+
+
+def sort_natural_sam(sam_file, output_file=None, sambamba=True, _sambamba_path='sambamba'):
+    if which(_sambamba_path) is None and sambamba:
+        logger.info('Cannot find {} on this machine, falling back to samtools sort. '
+                    'This is not a problem, but if you want to speed up your SAM/BAM '
+                    'file sorting, install sambamba and ensure it is in your PATH!'.format(_sambamba_path))
+        sambamba = False
+
+    basename, extension = os.path.splitext(sam_file)
+
+    replace_input = False
+    if output_file is None:
+        with tempfile.NamedTemporaryFile(delete=False, prefix='gr_', suffix=extension) as f:
+            output_file = f.name
+        replace_input = True
+
+    if sambamba:
+        sambamba_command = [_sambamba_path, 'sort', '-N', '-o', output_file, sam_file]
+        ret = subprocess.call(sambamba_command)
+        if ret != 0:
+            sambamba = False
+            logger.warning("{} failed, falling back to pysam/samtools".format(_sambamba_path))
+    if not sambamba:
+        pysam.sort('-n', '-o', output_file, sam_file)
+
+    if replace_input:
+        logger.info("Replacing input SAM/BAM file {} with sorted version...".format(sam_file))
+        shutil.copy(output_file, sam_file)
+        os.remove(output_file)
+        output_file = sam_file
+
+    return output_file
