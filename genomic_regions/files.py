@@ -25,6 +25,9 @@ import os
 logger = logging.getLogger(__name__)
 
 
+__all__ = ['write_bed', 'write_bigwig', 'write_gff']
+
+
 def create_temporary_copy(src_file_name, preserve_extension=True):
     """
     Copies the source file into a temporary file.
