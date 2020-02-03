@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Custom RegionBased subclasses &mdash; Genomic Regions 0.0.5-beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="Working with collections of genomic regions" href="multiple_regions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Genomic Regions
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started with Genomic Regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="individual_regions.html">Working with individual genomic regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_regions.html">Working with collections of genomic regions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Custom RegionBased subclasses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#init">__init__</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#region-iter">_region_iter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-regions">_get_regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#region-subset">_region_subset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-methods">other methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Genomic Regions</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Custom RegionBased subclasses</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/custom_region_based.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="custom-regionbased-subclasses">
+<span id="custom-region-based"></span><h1>Custom RegionBased subclasses<a class="headerlink" href="#custom-regionbased-subclasses" title="Permalink to this headline">¶</a></h1>
+<p>Are you working with a file format that is not natively supported by
+<code class="code docutils literal notranslate"><span class="pre">genomic_regions</span></code>? This guide will help you subclass <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code>
+yourself, so you can make use of the <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> functionality using
+any data format.</p>
+<p>To subclass <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code>, you need to override a couple of
+methods that form the basis of all other <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> methods:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code>: Use this to make data-type specific initialisations</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">_region_iter()</span></code>: Provides basic functionality to iterate over regions</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">_get_regions()</span></code>: Provides basic functionality to specifically select regions</p></li>
+</ul>
+<p>With the above methods you get all basic <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> functionality,
+but for additional speed benefits you should also override:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">_region_subset()</span></code>: Speeds up region selection by interval</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">_region_len()</span></code>: Return the number of regions in the object</p></li>
+</ul>
+<p>In addition, you may override any of the other methods to speed them up, such
+as the chromosome list <code class="code docutils literal notranslate"><span class="pre">chromosomes</span></code>.</p>
+<p>In the following, we will use the simple <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionWrapper</span></code> as implemented
+in this module for illustration:</p>
+<div class="section" id="init">
+<h2>__init__<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionWrapper</span></code> uses a simple list to store <code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code>
+objects, and interval trees from the <code class="code docutils literal notranslate"><span class="pre">intervaltree</span></code> module
+to allow the region subsetting.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">genomic_regions</span> <span class="kn">import</span> <span class="n">RegionBased</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">intervaltree</span>
+</pre></div>
+</div>
+<p>These are set up in the <code class="code docutils literal notranslate"><span class="pre">__init__</span></code> method. Each chromosome gets a
+separate interval tree, which is stored in a <code class="code docutils literal notranslate"><span class="pre">dict</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RegionWrapper</span><span class="p">(</span><span class="n">RegionBased</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regions</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RegionWrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="n">region_intervals</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># temporary variable used to hold intervals</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># internal list of regions</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">regions</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+            <span class="c1"># in the &quot;data&quot; argument, we store both the</span>
+            <span class="c1"># region and its original position in the list</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="n">intervaltree</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">region</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">region</span><span class="p">))</span>
+            <span class="n">region_intervals</span><span class="p">[</span><span class="n">region</span><span class="o">.</span><span class="n">chromosome</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_trees</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">chromosome</span><span class="p">,</span> <span class="n">intervals</span> <span class="ow">in</span> <span class="n">region_intervals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">region_trees</span><span class="p">[</span><span class="n">chromosome</span><span class="p">]</span> <span class="o">=</span> <span class="n">intervaltree</span><span class="o">.</span><span class="n">IntervalTree</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="region-iter">
+<h2>_region_iter<a class="headerlink" href="#region-iter" title="Permalink to this headline">¶</a></h2>
+<p>To iterate over the regions, we simply iterate over the regions list.
+<code class="code docutils literal notranslate"><span class="pre">_region_iter</span></code> should return an iterator:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_region_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regions</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">region</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-regions">
+<h2>_get_regions<a class="headerlink" href="#get-regions" title="Permalink to this headline">¶</a></h2>
+<p>To select specific regions, we can also use basic list subsetting:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_get_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regions</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="region-subset">
+<h2>_region_subset<a class="headerlink" href="#region-subset" title="Permalink to this headline">¶</a></h2>
+<p>Due to the use of interval trees, region subsetting is also not very complicated:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_region_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># select the intervaltree by chromosome</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_trees</span><span class="p">[</span><span class="n">region</span><span class="o">.</span><span class="n">chromosome</span><span class="p">]</span>
+
+    <span class="c1"># we sort by the region position int he list here, because that information</span>
+    <span class="c1"># is lost in intervaltree</span>
+    <span class="n">intervals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tree</span><span class="p">[</span><span class="n">region</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="n">region</span><span class="o">.</span><span class="n">end</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">interval</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># iterate over the overlapping regions</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-methods">
+<h2>other methods<a class="headerlink" href="#other-methods" title="Permalink to this headline">¶</a></h2>
+<p>Finally, we override two additional methods: <code class="code docutils literal notranslate"><span class="pre">_region_len</span></code> and <code class="code docutils literal notranslate"><span class="pre">chromosomes</span></code>.
+Both of these would normally be calculated by iterating over all regions to obtain
+the necessary information, but we can speed this up greatly by relying on the
+internal data structure we chose for <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionWrapper</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_region_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_regions</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">chromosomes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_trees</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>And that is all you need to subclass</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="multiple_regions.html" class="btn btn-neutral float-left" title="Working with collections of genomic regions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kai Kruse
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

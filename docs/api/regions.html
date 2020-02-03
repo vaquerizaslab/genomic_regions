@@ -1,0 +1,1053 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Regions module &mdash; Genomic Regions 0.0.5-beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Regions module" href="files.html" />
+    <link rel="prev" title="API" href="../api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Genomic Regions
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started with Genomic Regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../individual_regions.html">Working with individual genomic regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multiple_regions.html">Working with collections of genomic regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../custom_region_based.html">Custom RegionBased subclasses</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Genomic regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html">Writing genomic regions to file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="permute.html">Randomising genomic regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helpers.html">Helpers</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Genomic Regions</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>Regions module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/regions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-genomic_regions.regions">
+<span id="regions-module"></span><h1>Regions module<a class="headerlink" href="#module-genomic_regions.regions" title="Permalink to this headline">¶</a></h1>
+<p>This module provides functions and classes to work with genomic regions
+(also referred to as genomic intervals).</p>
+<p>Its main classes are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>: A class that represents a genomic region/interval</p></li>
+<li><p><a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a>: The base class for collections of genomic regions</p></li>
+</ul>
+<p>The aim of this module, besides providing an intuitive set of tools operating
+on genomic regions and collections thereof, is to supply a unified interface
+for the different representations of genomic region sets. Specifically, it
+gives the user access to the same methods with identical syntax regardless of
+what type of genomic regions file the user currently works with (BED, GFF,
+BigWig, Tabix, …).</p>
+<p>Most of the time, is is enough to open a file with <a class="reference internal" href="#genomic_regions.regions.load" title="genomic_regions.regions.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> - the module
+will figure out the underlying file type automatically. Please refer to the
+documentation for further details.</p>
+<dl class="class">
+<dt id="genomic_regions.regions.GenomicRegion">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">GenomicRegion</code><span class="sig-paren">(</span><em class="sig-param">chromosome=None</em>, <em class="sig-param">start=None</em>, <em class="sig-param">end=None</em>, <em class="sig-param">strand=None</em>, <em class="sig-param">ix=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a genomic region.</p>
+<dl class="attribute">
+<dt id="genomic_regions.regions.GenomicRegion.chromosome">
+<code class="sig-name descname">chromosome</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.chromosome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the chromosome this region is located on</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="genomic_regions.regions.GenomicRegion.start">
+<code class="sig-name descname">start</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start position of the region in base pairs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="genomic_regions.regions.GenomicRegion.end">
+<code class="sig-name descname">end</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>End position of the region in base pairs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="genomic_regions.regions.GenomicRegion.strand">
+<code class="sig-name descname">strand</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.strand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Strand this region is on. Can be a str (‘+’, ‘-‘, ‘.’),
+None, or an int (+1, -1)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="genomic_regions.regions.GenomicRegion.ix">
+<code class="sig-name descname">ix</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.ix" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Index of the region in the context of a set of</dt><dd><p>genomic regions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.as_bed_line">
+<code class="sig-name descname">as_bed_line</code><span class="sig-paren">(</span><em class="sig-param">score_field='score'</em>, <em class="sig-param">name_field='name'</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.as_bed_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a representation of this object as line in a BED file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>score_field</strong> – name of the attribute to be used in the
+‘score’ field of the BED line</p></li>
+<li><p><strong>name_field</strong> – name of the attribute to be used in the
+‘name’ field of the BED line</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.as_gff_line">
+<code class="sig-name descname">as_gff_line</code><span class="sig-paren">(</span><em class="sig-param">source_field='source'</em>, <em class="sig-param">feature_field='feature'</em>, <em class="sig-param">score_field='score'</em>, <em class="sig-param">frame_field='frame'</em>, <em class="sig-param">float_format='.2e'</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.as_gff_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a representation of this object as line in a GFF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_field</strong> – name of the attribute to be used in the
+‘source’ field of the GFF line</p></li>
+<li><p><strong>feature_field</strong> – name of the attribute to be used in the
+‘feature’ field of the GFF line</p></li>
+<li><p><strong>score_field</strong> – name of the attribute to be used in the
+‘score’ field of the GFF line</p></li>
+<li><p><strong>frame_field</strong> – name of the attribute to be used in the
+‘frame’ field of the GFF line</p></li>
+<li><p><strong>float_format</strong> – Formatting string for the float fields</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.attributes">
+<em class="property">property </em><code class="sig-name descname">attributes</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all visible attributes of this <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>.</p>
+<p>Returns all attribute names that do not start with an underscore.
+:return: list of attribute names</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.center">
+<em class="property">property </em><code class="sig-name descname">center</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the center coordinate of the <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.contains">
+<code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="sig-param">region</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the specified region is completely contained in this region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object or string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a (shallow) copy of this <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.expand">
+<code class="sig-name descname">expand</code><span class="sig-paren">(</span><em class="sig-param">absolute=None</em>, <em class="sig-param">relative=None</em>, <em class="sig-param">absolute_left=0</em>, <em class="sig-param">absolute_right=0</em>, <em class="sig-param">relative_left=0.0</em>, <em class="sig-param">relative_right=0.0</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">from_center=False</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand this region by a relative or an absolute amount.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>absolute</strong> – Absolute amount in base pairs by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on both
+sides. New region start will be
+&lt;old start - absolute&gt;, new region end
+will be &lt;old end + absolute&gt;</p></li>
+<li><p><strong>relative</strong> – Relative amount as fraction of region by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on both
+sides. New region start will be
+&lt;old start - relative*len(self)&gt;,
+new region end will be
+&lt;old end + relative*(len(self)&gt;</p></li>
+<li><p><strong>absolute_left</strong> – Absolute amount in base pairs by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on the
+left side</p></li>
+<li><p><strong>absolute_right</strong> – Absolute amount in base pairs by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on the
+right side</p></li>
+<li><p><strong>relative_left</strong> – Relative amount in base pairs by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on the
+left side</p></li>
+<li><p><strong>relative_right</strong> – Relative amount in base pairs by which to
+expand the region represented by this
+<a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object on the
+right side</p></li>
+<li><p><strong>copy</strong> – If True, return a copy of the original region,
+if False will modify the existing region in place</p></li>
+<li><p><strong>from_center</strong> – If True measures distance from center rather
+than start and end of the old region</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.five_prime">
+<em class="property">property </em><code class="sig-name descname">five_prime</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.five_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the position of the 5’ end of this <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>
+on the reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.fix_chromosome">
+<code class="sig-name descname">fix_chromosome</code><span class="sig-paren">(</span><em class="sig-param">copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.fix_chromosome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change chromosome representation from chr&lt;NN&gt; to &lt;NN&gt; or vice versa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>copy</strong> – If True, make copy of region, otherwise
+will modify existing region in place.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.from_string">
+<em class="property">classmethod </em><code class="sig-name descname">from_string</code><span class="sig-paren">(</span><em class="sig-param">region_string</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string into a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>.</p>
+<p>This is a very useful convenience function to quickly
+define a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object from a descriptor
+string. Numbers can be abbreviated as ‘12k’, ‘1.5M’, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region_string</strong> – A string of the form
+&lt;chromosome&gt;[:&lt;start&gt;-&lt;end&gt;[:&lt;strand&gt;]]
+(with square brackets indicating optional
+parts of the string). If any optional
+part of the string is omitted, intuitive
+defaults will be chosen.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.is_forward">
+<code class="sig-name descname">is_forward</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.is_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if this region is on the forward strand
+of the reference genome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if on ‘+’ strand, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.is_reverse">
+<code class="sig-name descname">is_reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.is_reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if this region is on the reverse strand
+of the reference genome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if on ‘-‘ strand, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.overlap">
+<code class="sig-name descname">overlap</code><span class="sig-paren">(</span><em class="sig-param">region</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the overlap in base pairs between this
+region and another region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> to find overlap for</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>overlap as int in base pairs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.overlaps">
+<code class="sig-name descname">overlaps</code><span class="sig-paren">(</span><em class="sig-param">region</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.overlaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this region overlaps with the specified region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object or string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.set_attribute">
+<code class="sig-name descname">set_attribute</code><span class="sig-paren">(</span><em class="sig-param">attribute</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.set_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safely set an attribute on the <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object.</p>
+<p>This automatically decodes bytes objects into UTF-8 strings.
+If you do not care about this, you can also use
+region.&lt;attribute&gt; = &lt;value&gt; directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute</strong> – Name of the attribute to be set</p></li>
+<li><p><strong>value</strong> – Value of the attribute to be set</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.strand_string">
+<em class="property">property </em><code class="sig-name descname">strand_string</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.strand_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the ‘strand’ attribute as string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>strand as str (‘+’, ‘-‘, or ‘.’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.three_prime">
+<em class="property">property </em><code class="sig-name descname">three_prime</code><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.three_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the position of the 3’ end of this <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>
+on the reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicRegion.to_string">
+<code class="sig-name descname">to_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicRegion.to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> to its string representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.Bed">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">Bed</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.Bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data type representing a BED file.</p>
+<p>Extends <code class="xref py py-class docutils literal notranslate"><span class="pre">BedTool</span></code> and therefore
+provides all the methods of the original class, such
+as intersect, etc.</p>
+<dl class="method">
+<dt id="genomic_regions.regions.Bed.merge_overlapping">
+<code class="sig-name descname">merge_overlapping</code><span class="sig-paren">(</span><em class="sig-param">stat=&lt;function intervals_weighted_mean&gt;</em>, <em class="sig-param">sort=True</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.Bed.merge_overlapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge overlapping BED intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stat</strong> – Function to use for scoring the merged interval.</p></li>
+<li><p><strong>sort</strong> – Sort bed file intervals by position before merging.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterator of merged intervals</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.Bedpe">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">Bedpe</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.Bedpe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a BEDPE file (genomic region pairs).</p>
+<p>Access each region of the pair with
+chromosome&lt;1|2&gt;
+start&lt;1|2&gt;
+end&lt;1|2&gt;
+strand&lt;1|2&gt;</p>
+<dl class="method">
+<dt id="genomic_regions.regions.Bedpe.file_type">
+<em class="property">property </em><code class="sig-name descname">file_type</code><a class="headerlink" href="#genomic_regions.regions.Bedpe.file_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the type of the current file.  One of (‘bed’,’vcf’,’gff’, ‘bam’,
+‘sam’, ‘empty’).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">pybedtools</span><span class="o">.</span><span class="n">example_bedtool</span><span class="p">(</span><span class="s1">&#39;a.bed&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">file_type</span><span class="p">)</span>
+<span class="go">bed</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.RegionWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">RegionWrapper</code><span class="sig-paren">(</span><em class="sig-param">regions</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide <a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a> functionality to any list of regions.</p>
+<p>This class uses interval trees internally to provide fast region subsetting.
+On initialisation these trees will be generated, which might take some time.</p>
+<dl class="method">
+<dt id="genomic_regions.regions.RegionWrapper.chromosomes">
+<code class="sig-name descname">chromosomes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionWrapper.chromosomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of chromosome names.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.RegionBased">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">RegionBased</code><a class="headerlink" href="#genomic_regions.regions.RegionBased" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for working with genomic regions.</p>
+<p>Guide for inheriting classes which functions to override:</p>
+<dl class="simple">
+<dt>MUST (basic functionality):</dt><dd><p>_region_iter
+_get_regions</p>
+</dd>
+<dt>SHOULD (works if above are implemented, but is highly inefficient):</dt><dd><p>_region_subset
+_region_intervals</p>
+</dd>
+<dt>CAN (override for potential speed benefits or added functionality):</dt><dd><p>_region_len
+chromosomes
+chromosome_lengths
+region_bins</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.add_region">
+<code class="sig-name descname">add_region</code><span class="sig-paren">(</span><em class="sig-param">region</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.add_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a genomic region to this object.</p>
+<p>This method offers some flexibility in the types of objects
+that can be loaded. See parameters for details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – Can be a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>, a str in the form
+‘&lt;chromosome&gt;:&lt;start&gt;-&lt;end&gt;[:&lt;strand&gt;], a dict with
+at least the fields ‘chromosome’, ‘start’, and
+‘end’, optionally ‘ix’, or a list of length 3
+(chromosome, start, end) or 4 (ix, chromosome,
+start, end).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.bin_intervals">
+<em class="property">static </em><code class="sig-name descname">bin_intervals</code><span class="sig-paren">(</span><em class="sig-param">intervals</em>, <em class="sig-param">bins</em>, <em class="sig-param">interval_range=None</em>, <em class="sig-param">smoothing_window=None</em>, <em class="sig-param">nan_replacement=None</em>, <em class="sig-param">zero_to_nan=False</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.bin_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bin a given set of intervals into a fixed number of bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intervals</strong> – iterator of tuples (start, end, score)</p></li>
+<li><p><strong>bins</strong> – Number of bins to divide the region into</p></li>
+<li><p><strong>interval_range</strong> – Optional. Tuple (start, end) in base pairs
+of range of interval to be binned. Useful if
+intervals argument does not cover to exact
+genomic range to be binned.</p></li>
+<li><p><strong>smoothing_window</strong> – Size of window (in bins) to smooth scores
+over</p></li>
+<li><p><strong>nan_replacement</strong> – NaN values in the scores will be replaced
+with this value</p></li>
+<li><p><strong>zero_to_nan</strong> – If True, will convert bins with score 0 to NaN</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterator of tuples: (start, end, score)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.bin_intervals_equidistant">
+<em class="property">static </em><code class="sig-name descname">bin_intervals_equidistant</code><span class="sig-paren">(</span><em class="sig-param">intervals</em>, <em class="sig-param">bin_size</em>, <em class="sig-param">interval_range=None</em>, <em class="sig-param">smoothing_window=None</em>, <em class="sig-param">nan_replacement=None</em>, <em class="sig-param">zero_to_nan=False</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.bin_intervals_equidistant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bin a given set of intervals into bins with a fixed size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intervals</strong> – iterator of tuples (start, end, score)</p></li>
+<li><p><strong>bin_size</strong> – Size of each bin in base pairs</p></li>
+<li><p><strong>interval_range</strong> – Optional. Tuple (start, end) in base pairs
+of range of interval to be binned. Useful if
+intervals argument does not cover to exact
+genomic range to be binned.</p></li>
+<li><p><strong>smoothing_window</strong> – Size of window (in bins) to smooth scores
+over</p></li>
+<li><p><strong>nan_replacement</strong> – NaN values in the scores will be replaced
+with this value</p></li>
+<li><p><strong>zero_to_nan</strong> – If True, will convert bins with score 0 to NaN</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterator of tuples: (start, end, score)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.binned_regions">
+<code class="sig-name descname">binned_regions</code><span class="sig-paren">(</span><em class="sig-param">region=None</em>, <em class="sig-param">bins=None</em>, <em class="sig-param">bin_size=None</em>, <em class="sig-param">smoothing_window=None</em>, <em class="sig-param">nan_replacement=None</em>, <em class="sig-param">zero_to_nan=False</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.binned_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as region_intervals, but returns <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>
+objects instead of tuples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> – String or class:<cite>~GenomicRegion</cite>
+object denoting the region to be binned</p></li>
+<li><p><strong>bins</strong> – Number of bins to divide the region into</p></li>
+<li><p><strong>bin_size</strong> – Size of each bin (alternative to bins argument)</p></li>
+<li><p><strong>smoothing_window</strong> – Size of window (in bins) to smooth scores
+over</p></li>
+<li><p><strong>nan_replacement</strong> – NaN values in the scores will be replaced
+with this value</p></li>
+<li><p><strong>zero_to_nan</strong> – If True, will convert bins with score 0 to NaN</p></li>
+<li><p><strong>args</strong> – Arguments passed to _region_intervals</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments passed to _region_intervals</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterator of <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.chromosome_lengths">
+<em class="property">property </em><code class="sig-name descname">chromosome_lengths</code><a class="headerlink" href="#genomic_regions.regions.RegionBased.chromosome_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of chromosomes and their length
+in bp.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.chromosomes">
+<code class="sig-name descname">chromosomes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.chromosomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of chromosome names.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.find_region">
+<code class="sig-name descname">find_region</code><span class="sig-paren">(</span><em class="sig-param">query_regions</em>, <em class="sig-param">_regions_dict=None</em>, <em class="sig-param">_region_ends=None</em>, <em class="sig-param">_chromosomes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.find_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the region that is at the center of a region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>query_regions</strong> – Region selector string, :class:~GenomicRegion, or
+list of the former</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index (or list of indexes) of the region at the center of the
+query region</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.intervals">
+<code class="sig-name descname">intervals</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for region_intervals.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.region_bins">
+<code class="sig-name descname">region_bins</code><span class="sig-paren">(</span><em class="sig-param">region</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.region_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a genomic region and returns a slice of the bin
+indices that are covered by the region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – String or class:<cite>~GenomicRegion</cite>
+object for which covered bins will
+be returned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slice</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.region_intervals">
+<code class="sig-name descname">region_intervals</code><span class="sig-paren">(</span><em class="sig-param">region</em>, <em class="sig-param">bins=None</em>, <em class="sig-param">bin_size=None</em>, <em class="sig-param">smoothing_window=None</em>, <em class="sig-param">nan_replacement=None</em>, <em class="sig-param">zero_to_nan=False</em>, <em class="sig-param">score_field='score'</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.region_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return equally-sized genomic intervals and associated scores.</p>
+<p>Use either bins or bin_size argument to control binning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> – String or class:<cite>~GenomicRegion</cite>
+object denoting the region to be binned</p></li>
+<li><p><strong>bins</strong> – Number of bins to divide the region into</p></li>
+<li><p><strong>bin_size</strong> – Size of each bin (alternative to bins argument)</p></li>
+<li><p><strong>smoothing_window</strong> – Size of window (in bins) to smooth scores
+over</p></li>
+<li><p><strong>nan_replacement</strong> – NaN values in the scores will be replaced
+with this value</p></li>
+<li><p><strong>zero_to_nan</strong> – If True, will convert bins with score 0 to NaN</p></li>
+<li><p><strong>args</strong> – Arguments passed to _region_intervals</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments passed to _region_intervals</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterator of tuples: (start, end, score)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.region_subset">
+<code class="sig-name descname">region_subset</code><span class="sig-paren">(</span><em class="sig-param">region</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.region_subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a class:<cite>~GenomicRegion</cite> and returns all regions that
+overlap with the supplied region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – String or class:<cite>~GenomicRegion</cite>
+object for which covered bins will
+be returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.regions">
+<em class="property">property </em><code class="sig-name descname">regions</code><a class="headerlink" href="#genomic_regions.regions.RegionBased.regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over genomic regions in this object.</p>
+<p>Will return a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> object in every iteration.
+Can also be used to get the number of regions by calling
+len() on the object returned by this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RegionIter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.regions_dict">
+<em class="property">property </em><code class="sig-name descname">regions_dict</code><a class="headerlink" href="#genomic_regions.regions.RegionBased.regions_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary with region index as keys
+and regions as values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dict {region.ix: region, …}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.to_bed">
+<code class="sig-name descname">to_bed</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">subset=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.to_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export regions as BED file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – Path of file to write regions to</p></li>
+<li><p><strong>subset</strong> – optional <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> or str to
+write only regions overlapping this region</p></li>
+<li><p><strong>kwargs</strong> – Passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">write_bed()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.to_bigwig">
+<code class="sig-name descname">to_bigwig</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">subset=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.to_bigwig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export regions as BigWig file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – Path of file to write regions to</p></li>
+<li><p><strong>subset</strong> – optional <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> or str to
+write only regions overlapping this region</p></li>
+<li><p><strong>kwargs</strong> – Passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">write_bigwig()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.RegionBased.to_gff">
+<code class="sig-name descname">to_gff</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">subset=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.RegionBased.to_gff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export regions as GFF file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – Path of file to write regions to</p></li>
+<li><p><strong>subset</strong> – optional <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> or str to
+write only regions overlapping this region</p></li>
+<li><p><strong>kwargs</strong> – Passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">write_gff()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.GenomicDataFrame">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">GenomicDataFrame</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code> as RegionBased object.</p>
+<p>For full functionality, must contains the columns:
+chromosome
+start
+end</p>
+<dl class="method">
+<dt id="genomic_regions.regions.GenomicDataFrame.chromosomes">
+<code class="sig-name descname">chromosomes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.GenomicDataFrame.chromosomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of chromosome names.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.Tabix">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">Tabix</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">preset=None</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.Tabix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a Tabix file.</p>
+<p>Tabix-indexed files offer large speed improvements over
+regular BED/VCF/GFF files.</p>
+<dl class="method">
+<dt id="genomic_regions.regions.Tabix.chromosomes">
+<code class="sig-name descname">chromosomes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.Tabix.chromosomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of chromosome names.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genomic_regions.regions.BigWig">
+<em class="property">class </em><code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">BigWig</code><span class="sig-paren">(</span><em class="sig-param">bw</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.BigWig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a BigWig file.</p>
+<p>Forwards function and property calls that do not belong to RegionBased
+to <code class="xref py py-class docutils literal notranslate"><span class="pre">BigWig</span></code>.</p>
+<dl class="method">
+<dt id="genomic_regions.regions.BigWig.chromosome_lengths">
+<em class="property">property </em><code class="sig-name descname">chromosome_lengths</code><a class="headerlink" href="#genomic_regions.regions.BigWig.chromosome_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of chromosomes and their length
+in bp.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.BigWig.chromosomes">
+<code class="sig-name descname">chromosomes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.BigWig.chromosomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of chromosome names.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.BigWig.intervals">
+<code class="sig-name descname">intervals</code><span class="sig-paren">(</span><em class="sig-param">region</em>, <em class="sig-param">bins=None</em>, <em class="sig-param">bin_size=None</em>, <em class="sig-param">smoothing_window=None</em>, <em class="sig-param">nan_replacement=None</em>, <em class="sig-param">zero_to_nan=False</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.BigWig.intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for region_intervals.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.BigWig.load_intervals_into_memory">
+<code class="sig-name descname">load_intervals_into_memory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.BigWig.load_intervals_into_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load entire BigWig file into memory.</p>
+<p>May speed up interval search over slow file systems or connections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genomic_regions.regions.BigWig.region_stats">
+<code class="sig-name descname">region_stats</code><span class="sig-paren">(</span><em class="sig-param">region</em>, <em class="sig-param">bins=1</em>, <em class="sig-param">stat='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.BigWig.region_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>BigWig.stats with region query.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> – <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p></li>
+<li><p><strong>bins</strong> – Number of bins with stats to return</p></li>
+<li><p><strong>stat</strong> – name of statistic to use (default: mean)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>interval stats</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.regions.as_region">
+<code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">as_region</code><span class="sig-paren">(</span><em class="sig-param">region</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.as_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert string to <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>.</p>
+<p>This function attempts to convert any string passed to it
+to a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>. Strings are expected to be
+of the form &lt;chromosome&gt;[:&lt;start&gt;-&lt;end&gt;[:[strand]], e.g.
+chr1:1-1000, 2:2mb-5mb:-, chrX:1.5kb-3mb, …</p>
+<p>Numbers can be abbreviated as ‘12k’, ‘1.5Mb’, etc.</p>
+<p>When fed a <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a>, it will simply be
+returned, making the use of this function as an
+“if-necessary” converter possible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region</strong> – str or <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.regions.load">
+<code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open file containing genomic regions as <a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a> object.</p>
+<p>‘Magic’ function that wraps a file containing genomic regions in a
+<a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a> interface, thus providing the same methods
+to different types of genomic data formats.</p>
+<p>Compatible formats include: BED, GFF/GTF, BigWig, and Tabix (i.e. BED,
+GFF, and compatible files index with tabix).</p>
+<p>SAM files are also detected, but opened using pysam.AlignmentFile,
+so they are not compatiable with the <a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a> interface
+(yet).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – Path to genomic regions file</p></li>
+<li><p><strong>args</strong> – Additional arguments passed to downstream class</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments passed to downstream class</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#genomic_regions.regions.RegionBased" title="genomic_regions.regions.RegionBased"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code></a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>ValueError if file type not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.regions.merge_overlapping_regions">
+<code class="sig-prename descclassname">genomic_regions.regions.</code><code class="sig-name descname">merge_overlapping_regions</code><span class="sig-paren">(</span><em class="sig-param">regions</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.regions.merge_overlapping_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge overlapping regions in list.</p>
+<p>Provided with a list of <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> objects,
+this function will determine overlapping regions and merge
+them. The output is a list of non-overlapping regions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>regions</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> objects</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> of merged <a class="reference internal" href="#genomic_regions.regions.GenomicRegion" title="genomic_regions.regions.GenomicRegion"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code></a> objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="files.html" class="btn btn-neutral float-right" title="Regions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kai Kruse
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Working with collections of genomic regions &mdash; Genomic Regions 0.0.5-beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Custom RegionBased subclasses" href="custom_region_based.html" />
+    <link rel="prev" title="Working with individual genomic regions" href="individual_regions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Genomic Regions
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started with Genomic Regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="individual_regions.html">Working with individual genomic regions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with collections of genomic regions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-or-constructing-regionbased-objects">Loading or constructing RegionBased objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-regionbased-objects">Working with RegionBased objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#region-subsets">Region subsets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#region-binning">Region binning</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_region_based.html">Custom RegionBased subclasses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Genomic Regions</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Working with collections of genomic regions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/multiple_regions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="working-with-collections-of-genomic-regions">
+<span id="multiple-regions"></span><h1><a class="toc-backref" href="#id1">Working with collections of genomic regions</a><a class="headerlink" href="#working-with-collections-of-genomic-regions" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#working-with-collections-of-genomic-regions" id="id1">Working with collections of genomic regions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#loading-or-constructing-regionbased-objects" id="id2">Loading or constructing RegionBased objects</a></p></li>
+<li><p><a class="reference internal" href="#working-with-regionbased-objects" id="id3">Working with RegionBased objects</a></p></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>In the last section, we explored how to work with individual <code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code>
+objects. This section will demonstrate how to work with lists or collections of regions,
+either loaded from file in any of the supported genomic file formats (BED, GFF, BigWig,
+Tabix, BEDPE, CSV or tab-delimited tables), or constructed programmatically.</p>
+<p>This tutorial assumes you have imported the genomic_regions package like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">genomic_regions</span> <span class="kn">as</span> <span class="nn">gr</span>
+</pre></div>
+</div>
+<div class="section" id="loading-or-constructing-regionbased-objects">
+<h2><a class="toc-backref" href="#id2">Loading or constructing RegionBased objects</a><a class="headerlink" href="#loading-or-constructing-regionbased-objects" title="Permalink to this headline">¶</a></h2>
+<p>To load genomic regions from a supported file format (see above), simply use the
+<code class="code docutils literal notranslate"><span class="pre">load</span></code> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rb</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/file.bed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">rb</span></code> is now a <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> object, providing access to a number
+of useful methods to work with the regions contained in it.</p>
+<p>You can also easily construct a <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> object from existing
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code> lists using <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionWrapper</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">chromosome</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;chr1&#39;</span><span class="p">,</span> <span class="s1">&#39;chr2&#39;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">GenomicRegion</span><span class="p">(</span><span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">99999</span><span class="p">,</span>
+                             <span class="n">score</span><span class="o">=</span><span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">100000</span><span class="p">)</span>
+        <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+<span class="n">rb</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">RegionWrapper</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Depending on the size of your region list, the last step could take a long time,
+as it constructs an internal data representation of the region list that
+facilitates fast searches across intervals. <code class="code docutils literal notranslate"><span class="pre">rb</span></code> is now a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> object.</p>
+</div>
+<div class="section" id="working-with-regionbased-objects">
+<h2><a class="toc-backref" href="#id3">Working with RegionBased objects</a><a class="headerlink" href="#working-with-regionbased-objects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="region-subsets">
+<h3>Region subsets<a class="headerlink" href="#region-subsets" title="Permalink to this headline">¶</a></h3>
+<p>The central attribute/method of <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> objects is <code class="code docutils literal notranslate"><span class="pre">regions</span></code>.
+When used as a property, it iterates over all regions in the object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">rb</span><span class="o">.</span><span class="n">regions</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+<span class="c1"># chr1:1-100000</span>
+<span class="c1"># chr1:100001-200000</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>If supported by the specific <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> subclass (works with most file
+types, otherwise a <code class="code docutils literal notranslate"><span class="pre">NotImplementedError</span></code> will be thrown) you can access ranges
+of, or specific regions using the square bracket notation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">rb</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+<span class="c1"># chr1:1-100001</span>
+<span class="c1"># chr1:100001-200001</span>
+<span class="c1"># chr1:200001-300001</span>
+<span class="c1"># chr1:300001-400001</span>
+<span class="c1"># chr1:400001-500001</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">rb</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># chr1:100001-200001</span>
+</pre></div>
+</div>
+<p>However, the real power of <code class="code docutils literal notranslate"><span class="pre">regions</span></code> lies in its double-use as a method.
+Without arguments, <code class="code docutils literal notranslate"><span class="pre">regions()</span></code> behaves exactly as <code class="code docutils literal notranslate"><span class="pre">regions</span></code>. By
+providing a region as first argument to <code class="code docutils literal notranslate"><span class="pre">regions()</span></code>, you can extract
+ranges of regions that overlap with the query:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">rb</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s1">&#39;chr1:1-300k&#39;</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+<span class="c1"># chr1:1-100001</span>
+<span class="c1"># chr1:100001-200001</span>
+<span class="c1"># chr1:200001-300001</span>
+</pre></div>
+</div>
+<p>You can also change the chromosome representation on the fly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">rb</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s1">&#39;chr1:1-300k&#39;</span><span class="p">,</span> <span class="n">fix_chromosome</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+
+<span class="c1"># 1:1-100001</span>
+<span class="c1"># 1:100001-200001</span>
+<span class="c1"># 1:200001-300001</span>
+</pre></div>
+</div>
+<p>If you are interested in all the chromosomes inside the <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code>
+object, simply use the <code class="code docutils literal notranslate"><span class="pre">chromosomes()</span></code> method.</p>
+</div>
+<div class="section" id="region-binning">
+<h3>Region binning<a class="headerlink" href="#region-binning" title="Permalink to this headline">¶</a></h3>
+<p>If your region objects are associated with scores, i.e. each object has a
+<code class="code docutils literal notranslate"><span class="pre">score</span></code> attribute with a float value, you can make use of the binning
+functions in <code class="xref py py-class docutils literal notranslate"><span class="pre">RegionBased</span></code> to get binned scores in a defined interval.</p>
+<p>The two main methods for this purpose are <code class="code docutils literal notranslate"><span class="pre">binned_regions</span></code>, which outputs
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code> objects, and <code class="code docutils literal notranslate"><span class="pre">region_intervals</span></code>, which simply
+returns tuples of the form <code class="code docutils literal notranslate"><span class="pre">(start,</span> <span class="pre">end,</span> <span class="pre">score)</span></code>. Other than the
+return type, the functions behave in identical fashion, so we are going to focus on
+<code class="code docutils literal notranslate"><span class="pre">binned_regions</span></code>.</p>
+<p>Simply provide <code class="code docutils literal notranslate"><span class="pre">binned_regions</span></code> with a genomic interval in the form of a string
+or a <code class="xref py py-class docutils literal notranslate"><span class="pre">GenomicRegion</span></code>, specify the number of <code class="code docutils literal notranslate"><span class="pre">bins</span></code>, and you will obtain
+equal-sized regions dividing the interval with scores equal to the mean of region
+scores falling into each bin, weighted by the size of the associated region.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">br</span> <span class="o">=</span> <span class="n">rb</span><span class="o">.</span><span class="n">binned_regions</span><span class="p">(</span><span class="s1">&#39;chr1&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">br</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">region</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+
+<span class="c1"># chr1:1-3333333 16.169993267997317</span>
+<span class="c1"># chr1:3333334-6666666 49.336625414171024</span>
+<span class="c1"># chr1:6666667-9999999 82.49999029411201</span>
+</pre></div>
+</div>
+<p>Alternatively, you can specify a <code class="code docutils literal notranslate"><span class="pre">bin_size</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">br</span> <span class="o">=</span> <span class="n">rb</span><span class="o">.</span><span class="n">binned_regions</span><span class="p">(</span><span class="s1">&#39;chr1&#39;</span><span class="p">,</span> <span class="n">bin_size</span><span class="o">=</span><span class="mi">3000000</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">br</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">region</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+
+<span class="c1"># chr1:1-3000000 14.500000000000004</span>
+<span class="c1"># chr1:3000001-6000000 44.50000000000001</span>
+<span class="c1"># chr1:6000001-9000000 74.50000000000001</span>
+</pre></div>
+</div>
+<p>Note that when choosing a <code class="code docutils literal notranslate"><span class="pre">bin_size</span></code> directly, partial bins at the end of the
+interval will be omitted.</p>
+<p>You can control different aspects of the binning with additional parameters. Most
+importantly, you can smooth the scores by choosing a <code class="code docutils literal notranslate"><span class="pre">smoothing_window</span></code> size
+<code class="code docutils literal notranslate"><span class="pre">n</span></code>, which will average scores across <code class="code docutils literal notranslate"><span class="pre">n</span></code> neighboring bins up- and
+downstream of each bin. I.e. a <code class="code docutils literal notranslate"><span class="pre">smoothing_window</span></code> of 2 will average across
+5 bins: two to the left, the original bin, and two to the right.
+If your data contains NaN values, you can replace them with a fixed value using
+<code class="code docutils literal notranslate"><span class="pre">nan_replacement</span></code>. On the other hand, you can use <code class="code docutils literal notranslate"><span class="pre">zero_to_nan</span></code> to
+remove scores of 0 from the calculations.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="custom_region_based.html" class="btn btn-neutral float-right" title="Custom RegionBased subclasses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="individual_regions.html" class="btn btn-neutral float-left" title="Working with individual genomic regions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kai Kruse
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Regions module &mdash; Genomic Regions 0.0.5-beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Regions module" href="permute.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Genomic Regions
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started with Genomic Regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../individual_regions.html">Working with individual genomic regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multiple_regions.html">Working with collections of genomic regions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../custom_region_based.html">Custom RegionBased subclasses</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="regions.html">Genomic regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html">Writing genomic regions to file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="permute.html">Randomising genomic regions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Helpers</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Genomic Regions</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>Regions module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/helpers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-genomic_regions.helpers">
+<span id="regions-module"></span><h1>Regions module<a class="headerlink" href="#module-genomic_regions.helpers" title="Permalink to this headline">¶</a></h1>
+<p>Helper functions for working with genomic regions.</p>
+<dl class="function">
+<dt id="genomic_regions.helpers.apply_sliding_func">
+<code class="sig-prename descclassname">genomic_regions.helpers.</code><code class="sig-name descname">apply_sliding_func</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">window</em>, <em class="sig-param">func=&lt;numpy.ma.core._frommethod object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.helpers.apply_sliding_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply function on a sliding window over an array, ignoring Numpy NaN values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – Numpy array on which function is applied</p></li>
+<li><p><strong>window</strong> – The sliding window is i - window:i + window + 1
+so total window is twice this parameter.</p></li>
+<li><p><strong>func</strong> – Function to apply</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.helpers.human_format">
+<code class="sig-prename descclassname">genomic_regions.helpers.</code><code class="sig-name descname">human_format</code><span class="sig-paren">(</span><em class="sig-param">num</em>, <em class="sig-param">precision=0</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.helpers.human_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format a number as a string, suffixing letter for 1000 (K), 100000 (M), …</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num</strong> – any number larger than zero</p></li>
+<li><p><strong>precision</strong> – number of positions after decimal point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>string representing the number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.helpers.intervals_weighted_mean">
+<code class="sig-prename descclassname">genomic_regions.helpers.</code><code class="sig-name descname">intervals_weighted_mean</code><span class="sig-paren">(</span><em class="sig-param">intervals</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.helpers.intervals_weighted_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weighted mean for merging multiple interval scores into one.</p>
+<p>Takes into account the size of each interval as score weight.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>intervals</strong> – list of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> (start, end, score)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>float score</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.helpers.natural_sort">
+<code class="sig-prename descclassname">genomic_regions.helpers.</code><code class="sig-name descname">natural_sort</code><span class="sig-paren">(</span><em class="sig-param">l</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.helpers.natural_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort list of chromosome names “naturally”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>l</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> of strings</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>naturally sorted <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code> of strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="genomic_regions.helpers.str_to_int">
+<code class="sig-prename descclassname">genomic_regions.helpers.</code><code class="sig-name descname">str_to_int</code><span class="sig-paren">(</span><em class="sig-param">num_string</em>, <em class="sig-param">decimal_separator='.'</em>, <em class="sig-param">thousand_separator='</em>, <em class="sig-param">'</em><span class="sig-paren">)</span><a class="headerlink" href="#genomic_regions.helpers.str_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string denoting a genomic location to int (base pairs).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_string</strong> – input <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p></li>
+<li><p><strong>decimal_separator</strong> – Decimal separator used for float conversion</p></li>
+<li><p><strong>thousand_separator</strong> – Thousand separator (to be ignored)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int (base pairs)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="permute.html" class="btn btn-neutral float-left" title="Regions module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kai Kruse
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
