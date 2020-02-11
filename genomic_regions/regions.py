@@ -28,7 +28,7 @@ import pybedtools
 import pysam
 
 from .files import write_bigwig, write_bed, write_gff
-from .helpers import natural_sort, str_to_int, apply_sliding_func, intervals_weighted_mean
+from .helpers import natural_sort, str_to_int, apply_sliding_func, intervals_weighted_mean, is_bigwig_or_bigbed
 
 try:
     from itertools import izip as zip
@@ -45,6 +45,7 @@ from builtins import object
 import pandas
 import pyBigWig
 import intervaltree
+import pybedtools
 import logging
 
 logger = logging.getLogger(__name__)
@@ -130,7 +131,7 @@ def load(file_name, *args, **kwargs):
     GFF, and compatible files index with tabix).
 
     SAM files are also detected, but opened using pysam.AlignmentFile,
-    so they are not compatiable with the :class:`~RegionBased` interface
+    so they are not compatible with the :class:`~RegionBased` interface
     (yet).
 
     :param file_name: Path to genomic regions file
@@ -141,53 +142,58 @@ def load(file_name, *args, **kwargs):
     """
     import os
     file_name = os.path.expanduser(file_name)
+    logger.debug("Trying to find region-based file type for {}".format(file_name))
 
     # SAM/BAM
     import pysam
     try:
+        logger.debug("SAM/BAM?")
         sb = pysam.AlignmentFile(file_name, 'rb')
         if kwargs.get('mode', 'r') != 'rb':
             sb.close()
             sb = pysam.AlignmentFile(file_name, *args, **kwargs)
         return sb
-    except (ValueError, IOError):
-        pass
+    except (ValueError, IOError) as e:
+        logger.debug("Not a SAM/BAM file (exception: {})".format(e))
 
     # Tabix
     try:
+        logger.debug("Trying Tabix")
         f = Tabix(file_name, *args, **kwargs)
         return f
-    except (IOError, OSError, ValueError, TypeError):
-        pass
+    except (IOError, OSError, ValueError, TypeError) as e:
+        logger.debug("Not a Tabix file (exception: {})".format(e))
 
     # BEDPE
     if file_name.endswith('.bedpe'):
+        logger.debug("File ending suggests BEDPE")
         try:
             f = Bedpe(file_name, *args, **kwargs)
             _ = f.regions[0]
             return f
-        except (ValueError, TypeError):
-            pass
+        except (ValueError, TypeError) as e:
+            logger.debug("Not a BEDPE file (exception: {})".format(e))
 
-    import pybedtools
-    f = Bed(file_name, *args, **kwargs)
+    # Bedtools
     try:
+        logger.debug("Trying file types that can be opened wth pybedtools")
+        f = Bed(file_name, *args, **kwargs)
         ft = f.file_type
         if ft != 'empty':
             return f
-    except (IndexError, pybedtools.MalformedBedLineError, UnicodeDecodeError):
-        pass
+    except (TypeError, IndexError, pybedtools.MalformedBedLineError, UnicodeDecodeError) as e:
+        logger.debug("Not a Bedtools-compatible file (exception: {})".format(e))
 
+    # BigWig
     try:
-        import pyBigWig
-        f = pyBigWig.open(file_name, 'r')
-        if kwargs.get('mode', 'r') != 'r':
-            f.close()
+        logger.debug("Trying BigWig file")
+        if is_bigwig_or_bigbed(file_name):
             f = pyBigWig.open(file_name, *args, **kwargs)
+            return BigWig(f)
+    except (ImportError, RuntimeError) as e:
+        logger.debug("Not a BigWig file (exception: {})".format(e))
 
-        return BigWig(f)
-    except (ImportError, RuntimeError):
-        raise ValueError("File type not recognised ({}).".format(file_name))
+    raise ValueError("File type not recognised ({}).".format(file_name))
 
 
 class GenomicRegion(object):

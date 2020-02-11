@@ -4,6 +4,13 @@ Helper functions for working with genomic regions.
 
 import re
 import numpy as np
+import binascii
+import tempfile
+from contextlib import contextmanager
+
+
+BIGWIG_MAGIC = b'26fc8f88'
+BIGBED_MAGIC = b'ebf28987'
 
 
 def human_format(num, precision=0):
@@ -116,3 +123,15 @@ def intervals_weighted_mean(intervals):
     # safety
     weights = [weight if weight > 0 else 1 for weight in weights]
     return np.average(valid[:, 2], weights=weights)
+
+
+def is_bigwig_or_bigbed(file_name):
+
+    with open(file_name, 'rb') as req:
+        head = req.read(4)
+        hexString = binascii.hexlify(head)
+
+        if hexString == BIGWIG_MAGIC or hexString == BIGBED_MAGIC:
+            return True
+
+    return False
