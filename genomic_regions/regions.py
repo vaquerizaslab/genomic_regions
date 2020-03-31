@@ -512,7 +512,7 @@ class GenomicRegion(object):
         return not self._equals(other)
 
     def __len__(self):
-        return self.end - self.start
+        return int(self.end) - int(self.start)
 
     def as_bed_line(self, score_field='score', name_field='name'):
         """
@@ -640,6 +640,7 @@ class GenomicRegion(object):
         if relative is not None:
             relative_left, relative_right = relative, relative
 
+        print(absolute_left, relative_left, len(self))
         extend_left_bp = str_to_int(absolute_left) + int(relative_left * len(self))
         extend_right_bp = str_to_int(absolute_right) + int(relative_right * len(self))
 
