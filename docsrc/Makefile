@@ -194,3 +194,6 @@ pseudoxml:
 github:
 	@make html
 	@cp -a _build/html/. ../docs
+	@cp ../docs/index.html ../docs/index_bak.html
+	@tail -n +3 ../docs/index_bak.html > ../docs/index.html
+	@rm ../docs/index_bak.html
