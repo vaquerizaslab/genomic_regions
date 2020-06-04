@@ -640,7 +640,6 @@ class GenomicRegion(object):
         if relative is not None:
             relative_left, relative_right = relative, relative
 
-        print(absolute_left, relative_left, len(self))
         extend_left_bp = str_to_int(absolute_left) + int(relative_left * len(self))
         extend_right_bp = str_to_int(absolute_right) + int(relative_right * len(self))
 
