@@ -5,8 +5,6 @@ Helper functions for working with genomic regions.
 import re
 import numpy as np
 import binascii
-import tempfile
-from contextlib import contextmanager
 
 
 BIGWIG_MAGIC = b'26fc8f88'
