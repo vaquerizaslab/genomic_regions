@@ -1592,6 +1592,24 @@ class Bedpe(Bed):
                            name=name)
         return lazy_region
 
+    def region_pairs(self, **kwargs):
+        lazy = kwargs.get('lazy', False)
+
+        region1 = GenomicRegion(chromosome=None, start=0, end=0, score=0, strand=1)
+        region2 = GenomicRegion(chromosome=None, start=0, end=0, score=0, strand=1)
+        for region in self.regions(**kwargs):
+            if lazy:
+                region1.update(chromosome=region.chromosome1, start=region.start1,
+                               end=region.end1, score=region.score, strand=region.strand1)
+                region2.update(chromosome=region.chromosome2, start=region.start2,
+                               end=region.end2, score=region.score, strand=region.strand2)
+            else:
+                region1 = GenomicRegion(chromosome=region.chromosome1, start=region.start1,
+                                        end=region.end1, score=region.score, strand=region.strand1)
+                region2 = GenomicRegion(chromosome=region.chromosome2, start=region.start2,
+                                        end=region.end2, score=region.score, strand=region.strand2)
+            yield region1, region2
+
 
 class BigWig(RegionBased):
     """
