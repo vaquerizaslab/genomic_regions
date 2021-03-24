@@ -151,6 +151,7 @@ def load(file_name, *args, **kwargs):
         if is_sam_or_bam(file_name):
             import pysam
             sb = pysam.AlignmentFile(file_name, *args, **kwargs)
+            return sb
     except (ImportError, ValueError, IOError) as e:
         logger.debug("Not a SAM/BAM file (exception: {})".format(e))
 
