@@ -9,6 +9,7 @@ import binascii
 
 BIGWIG_MAGIC = b'26fc8f88'
 BIGBED_MAGIC = b'ebf28987'
+BAM_MAGIC = b'1f8b0804'
 
 
 def human_format(num, precision=0):
@@ -131,5 +132,25 @@ def is_bigwig_or_bigbed(file_name):
 
         if hexString == BIGWIG_MAGIC or hexString == BIGBED_MAGIC:
             return True
+
+    return False
+
+
+def is_sam_or_bam(file_name):
+
+    with open(file_name, 'rb') as req:
+        head = req.read(4)
+        hexString = binascii.hexlify(head)
+
+        if hexString == BAM_MAGIC:
+            return True
+
+    try:
+        with open(file_name, 'r') as f:
+            line = f.readline()
+            if line.startswith('@'):
+                return True
+    except UnicodeDecodeError:
+        pass
 
     return False

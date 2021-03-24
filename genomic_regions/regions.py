@@ -28,7 +28,8 @@ import pybedtools
 import pysam
 
 from .files import write_bigwig, write_bed, write_gff
-from .helpers import natural_sort, str_to_int, apply_sliding_func, intervals_weighted_mean, is_bigwig_or_bigbed
+from .helpers import natural_sort, str_to_int, apply_sliding_func, intervals_weighted_mean, \
+    is_bigwig_or_bigbed, is_sam_or_bam
 
 try:
     from itertools import izip as zip
@@ -145,15 +146,12 @@ def load(file_name, *args, **kwargs):
     logger.debug("Trying to find region-based file type for {}".format(file_name))
 
     # SAM/BAM
-    import pysam
     try:
-        logger.debug("SAM/BAM?")
-        sb = pysam.AlignmentFile(file_name, 'rb')
-        if kwargs.get('mode', 'r') != 'rb':
-            sb.close()
+        logger.debug("Trying SAM/BAM file")
+        if is_sam_or_bam(file_name):
+            import pysam
             sb = pysam.AlignmentFile(file_name, *args, **kwargs)
-        return sb
-    except (ValueError, IOError) as e:
+    except (ImportError, ValueError, IOError) as e:
         logger.debug("Not a SAM/BAM file (exception: {})".format(e))
 
     # Tabix
